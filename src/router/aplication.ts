@@ -4,15 +4,15 @@ import path from 'node:path';
 const router = Router();
 
 const latestVersion = {
-  version: '1.0.4',
+  version: '1.0.5',
   notes: 'Primera versión de la aplicación',
   pub_date: '2025-01-09T12:00:00Z',
   platforms: {
     windows: {
-      url: 'https://aricab.nextstep-web.online/aplicacion/actualizar/app-1.0.4.exe',
+      url: 'https://aricab.nextstep-web.online/aplicacion/actualizar/app-1.0.5.exe',
     },
     linux: {
-      url: 'https://aricab.nextstep-web.online/aplicacion/actualizar/app-1.0.4.deb',
+      url: 'https://aricab.nextstep-web.online/aplicacion/actualizar/app-1.0.5.deb',
     }
   }
 };
