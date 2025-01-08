@@ -1,3 +1,4 @@
+import io from '@/app';
 import { encrypt } from '@/lib/encrypt';
 import UsuariosModels from '@/models/usuarios';
 import { ProductoType } from '@/types/productos';
@@ -182,6 +183,9 @@ class UsuariosControllers {
       if(response === 'Error al actualizar'){
         res.status(500).json({ message: response });
       }
+      
+      io.emit('updateProdRuta', productos);
+      io.emit('updateProd');
       
       res.status(200).json({ message: response });
     } catch {

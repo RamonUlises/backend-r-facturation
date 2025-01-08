@@ -135,7 +135,11 @@ class UsuariosModels {
       return null;
     }
   }
-  async actualizarProductosRuta(id: string, productos: Productos[], newProductos: ProductoType[]) {
+  async actualizarProductosRuta(
+    id: string,
+    productos: Productos[],
+    newProductos: ProductoType[],
+  ) {
     try {
       const ruta: RutasProductosType | null =
         await RutasProductosSchemas.findOne({ id });
@@ -145,13 +149,15 @@ class UsuariosModels {
       }
 
       await RutasProductosSchemas.updateOne({ id }, { productos });
-      
-      await Promise.all(newProductos.map(async (prd) => {
-        await ProductosSchema.updateOne({ id: prd.id }, { cantidad: prd.cantidad });
-      }));
 
-      io.emit('updateProdRuta', productos);
-      io.emit('updateProd');
+      await Promise.all(
+        newProductos.map(async (prd) => {
+          await ProductosSchema.updateOne(
+            { id: prd.id },
+            { cantidad: prd.cantidad },
+          );
+        }),
+      );
 
       return 'Productos actualizados';
     } catch {
