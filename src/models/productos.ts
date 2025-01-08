@@ -28,7 +28,8 @@ class ProductosModels {
   async crearProducto(
     id: string,
     nombre: string,
-    precio: number,
+    precioCompra: number,
+    precioVenta: number,
     cantidad: number,
   ) {
     try {
@@ -38,7 +39,7 @@ class ProductosModels {
         return 'Producto ya existe';
       }
 
-      await ProductosSchema.create({ id, nombre, precio, cantidad });
+      await ProductosSchema.create({ id, nombre, cantidad, precioCompra, precioVenta });
 
       return 'Producto creado';
     } catch {
@@ -48,7 +49,8 @@ class ProductosModels {
   async actualizarProducto(
     id: string,
     nombre: string,
-    precio: number,
+    precioCompra: number,
+    precioVenta: number,
     cantidad: number,
   ) {
     try {
@@ -64,7 +66,7 @@ class ProductosModels {
         return 'Nombre de producto ya existe';
       }
 
-      await ProductosSchema.updateOne({ id }, { nombre, precio, cantidad });
+      await ProductosSchema.updateOne({ id }, { nombre, cantidad, precioCompra, precioVenta });
 
       return 'Producto actualizado';
     } catch {

@@ -40,13 +40,14 @@ class ProductosControllers {
   }
   async crearProducto(req: Request, res: Response) {
     try {
-      const { nombre, precio, cantidad } = req.body as {
+      const { nombre, cantidad, precioCompra, precioVenta } = req.body as {
         nombre: string;
-        precio: number;
         cantidad: number;
+        precioCompra: number;
+        precioVenta: number;
       };
 
-      if (!nombre || !precio || !cantidad) {
+      if (!nombre || !cantidad || !precioCompra || !precioVenta) {
         return res.status(400).json({ message: 'Datos requeridos' });
       }
 
@@ -54,8 +55,9 @@ class ProductosControllers {
 
       const result = await ProductosModels.crearProducto(
         id,
-        nombre,
-        precio,
+        nombre.toLowerCase(),
+        precioCompra,
+        precioVenta,
         cantidad,
       );
 
@@ -63,7 +65,11 @@ class ProductosControllers {
         return res.status(400).json({ message: result });
       }
 
-      io.emit('productAdd', { id, nombre, precio, cantidad });
+      if(result === 'Error al crear producto') {
+        return res.status(500).json({ message: result });
+      }
+
+      io.emit('productAdd', { id, nombre: nombre.toLowerCase(), precioCompra, precioVenta, cantidad });
 
       return res.status(200).json({ message: result });
     } catch {
@@ -73,20 +79,22 @@ class ProductosControllers {
   async actualizarProducto(req: Request, res: Response) {
     try {
       const { id } = req.params as { id: string };
-      const { nombre, precio, cantidad } = req.body as {
+      const { nombre, cantidad, precioCompra, precioVenta } = req.body as {
         nombre: string;
-        precio: number;
+        precioCompra: number;
+        precioVenta: number;
         cantidad: number;
       };
 
-      if (!id || !nombre || !precio || !cantidad) {
+      if (!id || !nombre || !precioCompra || !cantidad || !precioVenta) {
         return res.status(400).json({ message: 'Datos requeridos' });
       }
 
       const result = await ProductosModels.actualizarProducto(
         id,
-        nombre,
-        precio,
+        nombre.toLowerCase(),
+        precioCompra,
+        precioVenta,
         cantidad,
       );
 
@@ -98,7 +106,11 @@ class ProductosControllers {
         return res.status(400).json({ message: result });
       }
 
-      io.emit('productUpdate', { id, nombre, precio, cantidad });
+      if(result === 'Error al actualizar producto') {
+        return res.status(500).json({ message: result });
+      }
+
+      io.emit('productUpdate', { id, nombre: nombre.toLowerCase(), precioCompra, precioVenta, cantidad });
 
       return res.status(200).json({ message: result });
     } catch {

@@ -1,5 +1,7 @@
 import { encrypt } from '@/lib/encrypt';
 import UsuariosModels from '@/models/usuarios';
+import { ProductoType } from '@/types/productos';
+import { Productos } from '@/types/rutasProductos';
 import { Request, Response } from 'express';
 
 class UsuariosControllers {
@@ -52,6 +54,14 @@ class UsuariosControllers {
 
       const result = await UsuariosModels.crearUsuario(usuario, newPassword);
 
+      if (result === 'Usuario ya existe') {
+        return res.status(400).json({ message: result });
+      }
+
+      if (result === 'Error al crear usuario') {
+        return res.status(500).json({ message: result });
+      }
+
       return res.status(200).json({ message: result });
     } catch {
       return res.status(500).json({ message: 'Error al crear usuario' });
@@ -79,6 +89,14 @@ class UsuariosControllers {
         newPassword,
       );
 
+      if (result === 'Usuario no encontrado') {
+        return res.status(404).json({ message: result });
+      }
+
+      if (result === 'Error al actualizar usuario') {
+        return res.status(500).json({ message: result });
+      }
+
       return res.status(200).json({ message: result });
     } catch {
       return res.status(500).json({ message: 'Error al actualizar usuario' });
@@ -93,6 +111,14 @@ class UsuariosControllers {
       }
 
       const result = await UsuariosModels.eliminarUsuario(id);
+
+      if (result === 'Usuario no encontrado') {
+        return res.status(404).json({ message: result });
+      }
+
+      if (result === 'Error al eliminar usuario') {
+        return res.status(500).json({ message: result });
+      }
 
       return res.status(200).json({ message: result });
     } catch {
@@ -123,6 +149,43 @@ class UsuariosControllers {
         .json({ message: 'Login correcto', token: result.token });
     } catch {
       return res.status(500).json({ message: 'Error al hacer login' });
+    }
+  }
+  async obtenerProductosRuta(req: Request, res: Response) {
+    try {
+      const { ruta } = req.params as { ruta: string };
+
+      const response = await UsuariosModels.obtenerProductosRuta(ruta);
+
+      if (response == null) {
+        return res.status(404).json({ message: 'Sin productos en la ruta' });
+      }
+      
+      return res.status(200).json(response);
+    } catch {
+      res
+        .status(500)
+        .json({ message: 'Error al obtener productos de la ruta' });
+    }
+  }
+  async actualizarProductosRuta(req: Request, res: Response){
+    try {
+      const { ruta } = req.params as { ruta: string };
+      const { productos, newProductos } = req.body as { productos: Productos[], newProductos: ProductoType[] };
+
+      const response = await UsuariosModels.actualizarProductosRuta(ruta, productos, newProductos);
+
+      if(response === 'Ruta no encontrada'){
+        res.status(404).json({ message: response });
+      }
+
+      if(response === 'Error al actualizar'){
+        res.status(500).json({ message: response });
+      }
+      
+      res.status(200).json({ message: response });
+    } catch {
+      res.status(500).json({ message: 'Error al actualizar'});
     }
   }
 }

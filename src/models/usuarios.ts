@@ -1,6 +1,11 @@
 import { UsuariosSchemas } from '@/schemas/usuarios';
 import { UsuariosTypes } from '@/types/usuarios';
 import { decrypt } from '@/lib/encrypt';
+import io from '@/app';
+import { RutasProductosSchemas } from '@/schemas/rutasProductos';
+import { Productos, RutasProductosType } from '@/types/rutasProductos';
+import { ProductoType } from '@/types/productos';
+import { ProductosSchema } from '@/schemas/productos';
 
 class UsuariosModels {
   async obtenerUsuarios() {
@@ -27,14 +32,25 @@ class UsuariosModels {
   }
   async crearUsuario(usuario: string, password: string) {
     try {
-      const user: UsuariosTypes | null = await UsuariosSchemas.findOne({ usuario });
+      const user: UsuariosTypes | null = await UsuariosSchemas.findOne({
+        usuario,
+      });
 
       if (user) {
         return 'Usuario ya existe';
       }
 
       const id = crypto.randomUUID();
+      const idRutaPrd = crypto.randomUUID();
+
       await UsuariosSchemas.create({ id, usuario, password });
+      await RutasProductosSchemas.create({
+        id: idRutaPrd,
+        ruta: id,
+        productos: [],
+      });
+
+      io.emit('rutaAdd', { id, usuario, password });
 
       return 'Usuario creado';
     } catch {
@@ -49,7 +65,15 @@ class UsuariosModels {
         return 'Usuario no encontrado';
       }
 
+      const user2 = await UsuariosSchemas.findOne({ usuario });
+
+      if (user2 && user2.id !== id) {
+        return 'Usuario ya existe';
+      }
+
       await UsuariosSchemas.updateOne({ id }, { usuario, password });
+
+      io.emit('rutaUpdate', { id, usuario, password });
 
       return 'Usuario actualizado';
     } catch {
@@ -66,6 +90,8 @@ class UsuariosModels {
 
       await UsuariosSchemas.deleteOne({ id });
 
+      io.emit('rutaDelete', id);
+
       return 'Usuario eliminado';
     } catch {
       return 'Error al eliminar usuario';
@@ -76,7 +102,9 @@ class UsuariosModels {
     password: string,
   ): Promise<{ status: boolean; message: string; token: string }> {
     try {
-      const user: UsuariosTypes | null = await UsuariosSchemas.findOne({ usuario });
+      const user: UsuariosTypes | null = await UsuariosSchemas.findOne({
+        usuario,
+      });
 
       if (user == null) {
         return { status: false, message: 'Usuario no encontrado', token: '' };
@@ -91,6 +119,43 @@ class UsuariosModels {
       }
     } catch {
       return { status: false, message: 'Error al loguear usuario', token: '' };
+    }
+  }
+  async obtenerProductosRuta(ruta: string) {
+    try {
+      const productos: RutasProductosType | null =
+        await RutasProductosSchemas.findOne({ ruta });
+
+      if (productos) {
+        return productos;
+      } else {
+        return null;
+      }
+    } catch {
+      return null;
+    }
+  }
+  async actualizarProductosRuta(id: string, productos: Productos[], newProductos: ProductoType[]) {
+    try {
+      const ruta: RutasProductosType | null =
+        await RutasProductosSchemas.findOne({ id });
+
+      if (!ruta) {
+        return 'Ruta no encontrada';
+      }
+
+      await RutasProductosSchemas.updateOne({ id }, { productos });
+      
+      await Promise.all(newProductos.map(async (prd) => {
+        await ProductosSchema.updateOne({ id: prd.id }, { cantidad: prd.cantidad });
+      }));
+
+      io.emit('updateProdRuta', productos);
+      io.emit('updateProd');
+
+      return 'Productos actualizados';
+    } catch {
+      return 'Error al actualizar';
     }
   }
 }

@@ -3,6 +3,7 @@ export interface ProductoType {
   __v?: number;
   id: string;
   nombre: string;
-  precio: number;
+  precioCompra: number;
+  precioVenta: number;
   cantidad: number;
 }

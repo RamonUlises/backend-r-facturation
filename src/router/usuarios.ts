@@ -27,4 +27,12 @@ router.post('/login', (req: Request, res: Response) => {
   void usuarios.login(req, res);
 });
 
+router.get('/:ruta/productos', (req, res) => {
+  void usuarios.obtenerProductosRuta(req, res);
+});
+
+router.put('/:ruta/productos', (req, res) => {
+  void usuarios.actualizarProductosRuta(req, res);
+});
+
 export default router;
