@@ -28,4 +28,11 @@ router.get('/actualizar/:filename', (req: Request, res: Response) => {
   res.download(file);
 });
 
+router.get('/descargar/:filename', (req: Request, res: Response) => {
+  const { filename } = req.params as { filename: string }; 
+  const file = path.join(__dirname, '../../src/updates', filename);
+
+  res.download(file);
+});
+
 export default router;
