@@ -23,7 +23,7 @@ router.get('/actualizar', (req: Request, res: Response) => {
 
 router.get('/actualizar/:filename', (req: Request, res: Response) => {
   const { filename } = req.params as { filename: string }; 
-  const file = path.join(__dirname, '../updates', filename);
+  const file = path.join(__dirname, '../../src/updates', filename);
 
   res.download(file);
 });
