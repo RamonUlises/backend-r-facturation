@@ -42,7 +42,8 @@ class ProductosModels {
       await ProductosSchema.create({ id, nombre, cantidad, precioCompra, precioVenta });
 
       return 'Producto creado';
-    } catch {
+    } catch(error) {
+      console.log(error);
       return 'Error al crear producto';
     }
   }

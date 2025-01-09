@@ -72,7 +72,8 @@ class ProductosControllers {
       io.emit('productAdd', { id, nombre: nombre.toLowerCase(), precioCompra, precioVenta, cantidad });
 
       return res.status(200).json({ message: result });
-    } catch {
+    } catch(error) {
+      console.log(error);
       res.status(500).json({ message: 'Error al crear producto' });
     }
   }
