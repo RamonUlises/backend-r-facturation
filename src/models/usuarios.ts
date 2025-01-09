@@ -7,6 +7,7 @@ import { Productos, RutasProductosType } from '@/types/rutasProductos';
 import { ProductoType } from '@/types/productos';
 import { ProductosSchema } from '@/schemas/productos';
 import crypto from 'node:crypto';
+import { ProductoFacturaType } from '@/types/facturas';
 
 class UsuariosModels {
   async obtenerUsuarios() {
@@ -90,6 +91,7 @@ class UsuariosModels {
       }
 
       await UsuariosSchemas.deleteOne({ id });
+      await RutasProductosSchemas.deleteOne({ ruta: id });
 
       io.emit('rutaDelete', id);
 
@@ -163,6 +165,58 @@ class UsuariosModels {
       return 'Productos actualizados';
     } catch {
       return 'Error al actualizar';
+    }
+  }
+  async actualizarCantidad(id: string, productos: ProductoFacturaType[]) {
+    try {
+      const ruta: RutasProductosType | null = await RutasProductosSchemas.findOne({ ruta: id });
+    
+      if (!ruta) return;
+    
+      const newProd = new Map<string, Productos>(); // Usamos un mapa para evitar duplicados.
+    
+      for (const prodRuta of ruta.productos) {
+        // Busca si el producto de la ruta está en la factura
+        const prodFac = productos.find((p) => p.nombre === prodRuta.nombre);
+    
+        if (prodFac) {
+          // Si el producto está en la factura, actualiza la cantidad
+          const nuevaCantidad = prodRuta.cantidad - prodFac.cantidad;
+          if (nuevaCantidad > 0) {
+            newProd.set(prodRuta.id, {
+              id: prodRuta.id,
+              nombre: prodRuta.nombre,
+              precio: prodRuta.precio,
+              cantidad: nuevaCantidad,
+            });
+          }
+        } else {
+          // Si el producto no está en la factura, lo agregamos tal cual
+          newProd.set(prodRuta.id, {
+            id: prodRuta.id,
+            nombre: prodRuta.nombre,
+            precio: prodRuta.precio,
+            cantidad: prodRuta.cantidad,
+          });
+        }
+      }
+    
+      // Convertimos el mapa a un array
+      const updatedProducts = Array.from(newProd.values());
+    
+      console.log(updatedProducts);
+    
+      // Actualizamos la base de datos con los nuevos productos
+      await RutasProductosSchemas.updateOne(
+        { ruta: id },
+        { productos: updatedProducts },
+      );
+    
+      // Emitimos los eventos
+      io.emit('updateProdRuta', updatedProducts);
+      io.emit('updateProd');
+    } catch (error) {
+      console.error('Error', error);
     }
   }
 }

@@ -3,6 +3,7 @@ import { ClientesSchema } from '@/schemas/clientes';
 import { FacturaType, ProductoFacturaType } from '@/types/facturas';
 import { ProductosSchema } from '@/schemas/productos';
 import io from '@/app';
+import UsuarioModels from '@/models/usuarios';
 
 class FacturasModels {
   async obtenerFacturas() {
@@ -41,21 +42,31 @@ class FacturasModels {
         }
       }
 
-      const suma = factura.productos.reduce((acc: number, producto: ProductoFacturaType) => {
-        return acc + producto.precio * producto.cantidad;
-      }, 0);
+      const suma = factura.productos.reduce(
+        (acc: number, producto: ProductoFacturaType) => {
+          return acc + producto.precio * producto.cantidad;
+        },
+        0,
+      );
 
       if (factura.tipo === 'credito') {
-        await ClientesSchema.updateOne({ nombres: factura.nombre }, { credito: cliente.credito + suma });
+        await ClientesSchema.updateOne(
+          { nombres: factura.nombre },
+          { credito: cliente.credito + suma },
+        );
 
-        io.emit('credito', { id: cliente.id as string, credito: cliente.credito + suma });
+        io.emit('credito', {
+          id: cliente.id as string,
+          credito: cliente.credito + suma,
+        });
       }
 
       await FacturasSchemas.create({ ...factura, total: suma });
+      await UsuarioModels.actualizarCantidad(factura['id-facturador'], factura.productos);
 
       return 'Factura creada';
-    } catch (errro) {
-      return errro;
+    } catch {
+      return 'Error al crear la factura';
     }
   }
   async actualizarFactura(id: string, productos: ProductoFacturaType[]) {
@@ -76,23 +87,34 @@ class FacturasModels {
         }
       }
 
-      const suma = productos.reduce((acc: number, producto: ProductoFacturaType) => {
-        return acc + producto.precio * producto.cantidad;
-      }, 0);
-
-      if(factur.tipo === 'credito') {
-        const sumaAnterior = factur.productos.reduce((acc: number, producto: ProductoFacturaType) => {
+      const suma = productos.reduce(
+        (acc: number, producto: ProductoFacturaType) => {
           return acc + producto.precio * producto.cantidad;
-        }, 0);
-               
-        const cliente = await ClientesSchema.findOne({ nombres: factur.nombre });
-        
+        },
+        0,
+      );
+
+      if (factur.tipo === 'credito') {
+        const sumaAnterior = factur.productos.reduce(
+          (acc: number, producto: ProductoFacturaType) => {
+            return acc + producto.precio * producto.cantidad;
+          },
+          0,
+        );
+
+        const cliente = await ClientesSchema.findOne({
+          nombres: factur.nombre,
+        });
+
         if (!cliente) {
           return 'Cliente no encontrado';
         }
-        
-        const total = (cliente.credito - sumaAnterior) + suma;
-        await ClientesSchema.updateOne({ nombres: factur.nombre }, { credito: suma });
+
+        const total = cliente.credito - sumaAnterior + suma;
+        await ClientesSchema.updateOne(
+          { nombres: factur.nombre },
+          { credito: suma },
+        );
 
         io.emit('credito', { id: cliente.id as string, credito: total });
       }

@@ -33,19 +33,44 @@ class FacturasControllers {
   }
   async crearFactura(req: Request, res: Response) {
     try {
-      const {id, nombre, productos, tipo, facturador, fecha } = req.body as {id: string, nombre: string; productos: ProductoFacturaType[], tipo: string, facturador: string, fecha: Date };
+      const { id, nombre, productos, tipo, facturador, fecha } = req.body as {
+        id: string;
+        nombre: string;
+        productos: ProductoFacturaType[];
+        tipo: string;
+        facturador: string;
+        fecha: Date;
+      };
 
-      if (!nombre || !Array.isArray(productos) || !tipo || !facturador || isNaN(new Date(fecha).getTime())) {
+      if (
+        !nombre ||
+        !Array.isArray(productos) ||
+        !tipo ||
+        !facturador ||
+        isNaN(new Date(fecha).getTime())
+      ) {
         return res.status(400).json({ message: 'Faltan datos' });
       }
 
-      const response = await FacturasModels.crearFactura({id, nombre, fecha, productos, tipo, total: 0, 'id-facturador': facturador});
+      const response = await FacturasModels.crearFactura({
+        id,
+        nombre,
+        fecha,
+        productos,
+        tipo,
+        total: 0,
+        'id-facturador': facturador,
+      });
 
-      if(response === 'Cliente no encontrado') {
+      if (response === 'Cliente no encontrado') {
         return res.status(404).json({ message: response });
       }
 
-      if(response === 'Error al crear la factura') {
+      if (response === 'Producto no encontrado') {
+        return res.status(404).json({ message: response });
+      }
+
+      if (response === 'Error al crear la factura') {
         return res.status(400).json({ message: response });
       }
 
@@ -65,11 +90,11 @@ class FacturasControllers {
 
       const response = await FacturasModels.actualizarFactura(id, productos);
 
-      if(response === 'Factura no encontrada') {
+      if (response === 'Factura no encontrada') {
         return res.status(404).json({ message: response });
       }
 
-      if(response === 'Error al actualizar la factura') {
+      if (response === 'Error al actualizar la factura') {
         return res.status(400).json({ message: response });
       }
 
@@ -84,7 +109,7 @@ class FacturasControllers {
 
       const response = await FacturasModels.eliminarFactura(id);
 
-      if(response === 'Error al eliminar la factura') {
+      if (response === 'Error al eliminar la factura') {
         return res.status(400).json({ message: response });
       }
 
