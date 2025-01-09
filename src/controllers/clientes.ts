@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import ClientesModels from '../models/clientes';
 import io from '@/app';
+import crypto from 'node:crypto';
 
 class ClientesControllers {
   async obtenerClientes(req: Request, res: Response) {

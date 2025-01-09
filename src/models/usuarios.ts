@@ -6,6 +6,7 @@ import { RutasProductosSchemas } from '@/schemas/rutasProductos';
 import { Productos, RutasProductosType } from '@/types/rutasProductos';
 import { ProductoType } from '@/types/productos';
 import { ProductosSchema } from '@/schemas/productos';
+import crypto from 'node:crypto';
 
 class UsuariosModels {
   async obtenerUsuarios() {

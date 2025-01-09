@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import ProductosModels from '../models/productos';
 import io from '@/app';
+import crypto from 'node:crypto';
 
 class ProductosControllers {
   async obtenerProductos(req: Request, res: Response) {
