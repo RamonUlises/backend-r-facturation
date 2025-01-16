@@ -23,4 +23,8 @@ router.delete('/:id', (req, res) => {
   void FacturasControllers.eliminarFactura(req, res);
 });
 
+router.put('/abonar/:id', (req, res) => {
+  void FacturasControllers.abonarFactura(req, res);
+});
+
 export default router;

@@ -33,13 +33,14 @@ class FacturasControllers {
   }
   async crearFactura(req: Request, res: Response) {
     try {
-      const { id, nombre, productos, tipo, facturador, fecha } = req.body as {
+      const { id, nombre, productos, tipo, facturador, fecha, pagado } = req.body as {
         id: string;
         nombre: string;
         productos: ProductoFacturaType[];
         tipo: string;
         facturador: string;
         fecha: Date;
+        pagado: number;
       };
 
       if (
@@ -60,13 +61,10 @@ class FacturasControllers {
         tipo,
         total: 0,
         'id-facturador': facturador,
+        pagado,
       });
 
       if (response === 'Cliente no encontrado') {
-        return res.status(404).json({ message: response });
-      }
-
-      if (response === 'Producto no encontrado') {
         return res.status(404).json({ message: response });
       }
 
@@ -82,13 +80,13 @@ class FacturasControllers {
   async actualizarFactura(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { productos } = req.body as { productos: ProductoFacturaType[] };
+      const { productos, tipo, pagado } = req.body as { productos: ProductoFacturaType[], tipo: string, pagado: number };
 
       if (!Array.isArray(productos)) {
         return res.status(400).json({ message: 'Faltan datos' });
       }
 
-      const response = await FacturasModels.actualizarFactura(id, productos);
+      const response = await FacturasModels.actualizarFactura(id, productos, tipo, pagado);
 
       if (response === 'Factura no encontrada') {
         return res.status(404).json({ message: response });
@@ -116,6 +114,30 @@ class FacturasControllers {
       return res.status(200).json({ message: response });
     } catch {
       res.status(500).json({ message: 'Error al eliminar factura' });
+    }
+  }
+  async abonarFactura(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { abono } = req.body as { abono: number };
+
+      if (isNaN(abono)) {
+        return res.status(400).json({ message: 'Faltan datos' });
+      }
+
+      const response = await FacturasModels.abonarFactura(id, abono);
+
+      if (response === 'Factura no encontrada') {
+        return res.status(404).json({ message: response });
+      }
+
+      if (response === 'Error al abonar la factura') {
+        return res.status(400).json({ message: response });
+      }
+
+      return res.status(200).json({ message: response });
+    } catch {
+      res.status(500).json({ message: 'Error al abonar factura' });
     }
   }
 }

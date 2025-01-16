@@ -147,7 +147,7 @@ class UsuariosControllers {
 
       return res
         .status(200)
-        .json({ message: 'Login correcto', token: result.token });
+        .json({ message: 'Login correcto', token: result.token, usuarioo: usuario });
     } catch {
       return res.status(500).json({ message: 'Error al hacer login' });
     }

@@ -1,9 +1,8 @@
 import { FacturasSchemas } from '@/schemas/facturas';
 import { ClientesSchema } from '@/schemas/clientes';
 import { FacturaType, ProductoFacturaType } from '@/types/facturas';
-import { ProductosSchema } from '@/schemas/productos';
-import io from '@/app';
 import UsuarioModels from '@/models/usuarios';
+import io from '@/app';
 
 class FacturasModels {
   async obtenerFacturas() {
@@ -32,16 +31,6 @@ class FacturasModels {
         return 'Cliente no encontrado';
       }
 
-      for (const producto of factura.productos) {
-        const productoEncontrado = await ProductosSchema.findOne({
-          nombre: producto.nombre,
-        });
-
-        if (!productoEncontrado) {
-          return 'Producto no encontrado';
-        }
-      }
-
       const suma = factura.productos.reduce(
         (acc: number, producto: ProductoFacturaType) => {
           return acc + producto.precio * producto.cantidad;
@@ -49,42 +38,23 @@ class FacturasModels {
         0,
       );
 
-      if (factura.tipo === 'credito') {
-        await ClientesSchema.updateOne(
-          { nombres: factura.nombre },
-          { credito: cliente.credito + suma },
-        );
-
-        io.emit('credito', {
-          id: cliente.id as string,
-          credito: cliente.credito + suma,
-        });
-      }
-
       await FacturasSchemas.create({ ...factura, total: suma });
       await UsuarioModels.actualizarCantidad(factura['id-facturador'], factura.productos);
 
+      io.emit('facturaAdd', { id: factura.id, nombre: factura.nombre, fecha: factura.fecha, productos: factura.productos, tipo: factura.tipo, total: suma, pagado: factura.pagado });
+
       return 'Factura creada';
-    } catch {
+    } catch(err) {
+      console.log(err);
       return 'Error al crear la factura';
     }
   }
-  async actualizarFactura(id: string, productos: ProductoFacturaType[]) {
+  async actualizarFactura(id: string, productos: ProductoFacturaType[], tipo: string, pagado: number) {
     try {
       const factur = await FacturasSchemas.findOne({ id });
 
       if (!factur) {
         return 'Factura no encontrada';
-      }
-
-      for (const producto of productos) {
-        const productoEncontrado = await ProductosSchema.findOne({
-          nombre: producto.nombre,
-        });
-
-        if (!productoEncontrado) {
-          return 'Producto no encontrado';
-        }
       }
 
       const suma = productos.reduce(
@@ -94,32 +64,10 @@ class FacturasModels {
         0,
       );
 
-      if (factur.tipo === 'credito') {
-        const sumaAnterior = factur.productos.reduce(
-          (acc: number, producto: ProductoFacturaType) => {
-            return acc + producto.precio * producto.cantidad;
-          },
-          0,
-        );
+      await FacturasSchemas.updateOne({ id }, { productos, total: suma, tipo, pagado });
+      await UsuarioModels.actualizarCantidadUpdate(factur['id-facturador'], productos, factur.productos);
 
-        const cliente = await ClientesSchema.findOne({
-          nombres: factur.nombre,
-        });
-
-        if (!cliente) {
-          return 'Cliente no encontrado';
-        }
-
-        const total = cliente.credito - sumaAnterior + suma;
-        await ClientesSchema.updateOne(
-          { nombres: factur.nombre },
-          { credito: suma },
-        );
-
-        io.emit('credito', { id: cliente.id as string, credito: total });
-      }
-
-      await FacturasSchemas.updateOne({ id }, { productos, total: suma });
+      io.emit('facturaUpdate', { id, productos, total: suma, tipo, pagado });
 
       return 'Factura actualizada';
     } catch {
@@ -139,6 +87,24 @@ class FacturasModels {
       return 'Factura eliminada';
     } catch {
       return 'Error al eliminar la factura';
+    }
+  }
+  async abonarFactura(id: string, abono: number) {
+    try {
+      const factur: FacturaType | null = await FacturasSchemas.findOne({ id });
+
+      if (!factur) {
+        return 'Factura no encontrada';
+      }
+
+      const total = factur.pagado + abono;
+
+      await FacturasSchemas.updateOne({ id }, { pagado: total });
+      io.emit('facturaAbonar', { id, total });
+
+      return 'Factura abonada';
+    }  catch {
+      return 'Error al abonar la factura';
     }
   }
 }

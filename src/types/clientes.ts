@@ -5,5 +5,4 @@ export interface ClienteType {
   nombres: string;
   direccion: string;
   telefono: string;
-  credito?: number;
 }
