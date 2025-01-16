@@ -1,4 +1,5 @@
 export interface ProductoFacturaType {
+  id: string;
   nombre: string;
   precio: number;
   cantidad: number;
@@ -12,4 +13,5 @@ export interface FacturaType {
   productos: ProductoFacturaType[];
   tipo: string;
   total: number;
+  pagado: number;
 }
