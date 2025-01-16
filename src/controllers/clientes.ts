@@ -56,6 +56,10 @@ class ClientesControllers {
         return res.status(400).json({ message: resultado });
       }
 
+      if(resultado === 'Error al crear cliente'){
+        return res.status(500).json({ message: resultado });
+      }
+
       io.emit('clienteAdd', { id, nombres, direccion, telefono, credito: 0 });
 
       return res.status(200).json({ message: resultado });
