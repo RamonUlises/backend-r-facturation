@@ -60,7 +60,7 @@ class ClientesControllers {
         return res.status(500).json({ message: resultado });
       }
 
-      io.emit('clienteAdd', { id, nombres, direccion, telefono, credito: 0 });
+      io.emit('clienteAdd', { id, nombres, direccion, telefono });
 
       return res.status(200).json({ message: resultado });
     } catch {
