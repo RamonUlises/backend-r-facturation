@@ -83,6 +83,7 @@ class FacturasModels {
       }
 
       await FacturasSchemas.deleteOne({ id });
+      io.emit('facturaDelete', id);
 
       return 'Factura eliminada';
     } catch {
