@@ -140,6 +140,21 @@ class FacturasControllers {
       res.status(500).json({ message: 'Error al abonar factura' });
     }
   }
+  async obtenerFacturasFacturador(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const facturas = await FacturasModels.obtenerFacturasFacturador(id);
+
+      if (facturas.length === 0) {
+        return res.status(404).json({ message: 'No hay facturas' });
+      }
+
+      return res.status(200).json(facturas);
+    } catch {
+      res.status(500).json({ message: 'Error al obtener facturas' });
+    }
+  }
 }
 
 export default new FacturasControllers();

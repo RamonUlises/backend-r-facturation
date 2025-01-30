@@ -41,7 +41,7 @@ class FacturasModels {
       await FacturasSchemas.create({ ...factura, total: suma });
       await UsuarioModels.actualizarCantidad(factura['id-facturador'], factura.productos);
 
-      io.emit('facturaAdd', { id: factura.id, nombre: factura.nombre, fecha: factura.fecha, productos: factura.productos, tipo: factura.tipo, total: suma, pagado: factura.pagado });
+      io.emit('facturaAdd', { id: factura.id, nombre: factura.nombre, fecha: factura.fecha, productos: factura.productos, tipo: factura.tipo, total: suma, pagado: factura.pagado, 'id-facturador': factura['id-facturador'] });
 
       return 'Factura creada';
     } catch(err) {
@@ -67,7 +67,7 @@ class FacturasModels {
       await FacturasSchemas.updateOne({ id }, { productos, total: suma, tipo, pagado });
       await UsuarioModels.actualizarCantidadUpdate(factur['id-facturador'], productos, factur.productos);
 
-      io.emit('facturaUpdate', { id, productos, total: suma, tipo, pagado });
+      io.emit('facturaUpdate', { id, productos, total: suma, tipo, pagado, facturador: factur['id-facturador'] });
 
       return 'Factura actualizada';
     } catch {
@@ -83,7 +83,7 @@ class FacturasModels {
       }
 
       await FacturasSchemas.deleteOne({ id });
-      io.emit('facturaDelete', id);
+      io.emit('facturaDelete', id, factur['id-facturador']);
 
       return 'Factura eliminada';
     } catch {
@@ -106,6 +106,15 @@ class FacturasModels {
       return 'Factura abonada';
     }  catch {
       return 'Error al abonar la factura';
+    }
+  }
+  async obtenerFacturasFacturador(id: string) {
+    try {
+      const facturas: FacturaType[] = await FacturasSchemas.find({ 'id-facturador': id });
+
+      return facturas;
+    } catch {
+      return [];
     }
   }
 }
