@@ -1,3 +1,4 @@
+import io from '@/app';
 import usuarios from '@/controllers/usuarios';
 import { Router, Request, Response } from 'express';
 
@@ -33,6 +34,14 @@ router.get('/:ruta/productos', (req, res) => {
 
 router.put('/:ruta/productos', (req, res) => {
   void usuarios.actualizarProductosRuta(req, res);
+});
+
+router.get('/admin/:id', (req, res) => {
+  const id: string = req.params.id;
+
+  io.emit('permisoAdmin', id);
+
+  res.status(200).send({ message: 'Permiso de administrador enviado' });
 });
 
 export default router;
