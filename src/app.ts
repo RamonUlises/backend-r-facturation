@@ -12,6 +12,8 @@ import clientes from './router/clientes';
 import facturas from './router/facturas';
 import aplication from './router/aplication';
 import personal from './router/personal';
+import cambios from './router/cambios';
+import devoluciones from './router/devoluciones';
 
 const app = express();
 const port: number | string = process.env.PORT ?? 3000;
@@ -42,6 +44,8 @@ app.use('/clientes', clientes);
 app.use('/facturas', facturas);
 app.use('/aplicacion', aplication);
 app.use('/personal', personal);
+app.use('/cambios', cambios);
+app.use('/devoluciones', devoluciones);
 
 app.use((req, res) => {
   res.status(404).send({ message: 'Ruta no encontrada' });

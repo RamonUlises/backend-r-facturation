@@ -8,6 +8,7 @@ import { ProductoType } from '@/types/productos';
 import { ProductosSchema } from '@/schemas/productos';
 import crypto from 'node:crypto';
 import { ProductoFacturaType } from '@/types/facturas';
+import { ProductoCambio } from '@/types/cambios';
 
 class UsuariosModels {
   async obtenerUsuarios() {
@@ -218,6 +219,123 @@ class UsuariosModels {
     }
   }
   async actualizarCantidadUpdate(id: string, newProductos: ProductoFacturaType[], oldProductos: ProductoFacturaType[]) {
+    try {
+      const ruta: RutasProductosType | null =
+        await RutasProductosSchemas.findOne({ ruta: id });
+
+      if (!ruta) return;
+
+      const newProd = new Map<string, Productos>(); // Usamos un mapa para evitar duplicados.
+
+      for (const prodRuta of ruta.productos) {
+        const prodOld = oldProductos.find((p) => p.nombre === prodRuta.nombre);
+        const prodNew = newProductos.find((p) => p.nombre === prodRuta.nombre);
+
+        if(prodNew && prodOld){
+          let newCantidad = prodRuta.cantidad;
+          if(prodNew.cantidad > prodOld.cantidad){
+            newCantidad = prodRuta.cantidad - (prodNew.cantidad - prodOld.cantidad);
+          } else if(prodNew.cantidad < prodOld.cantidad){
+            newCantidad = prodRuta.cantidad + (prodOld.cantidad - prodNew.cantidad);
+          }
+
+          newProd.set(prodRuta.id, {
+            id: prodRuta.id,
+            nombre: prodRuta.nombre,
+            precio: prodRuta.precio,
+            cantidad: newCantidad,
+          });
+        } else if(prodOld && !prodNew){
+          newProd.set(prodRuta.id, {
+            id: prodRuta.id,
+            nombre: prodRuta.nombre,
+            precio: prodRuta.precio,
+            cantidad: prodRuta.cantidad + prodOld.cantidad,
+          });
+        } else if(prodNew && !prodOld){
+          newProd.set(prodRuta.id, {
+            id: prodRuta.id,
+            nombre: prodRuta.nombre,
+            precio: prodRuta.precio,
+            cantidad: prodRuta.cantidad - prodNew.cantidad,
+          });
+        } else {
+          newProd.set(prodRuta.id, {
+            id: prodRuta.id,
+            nombre: prodRuta.nombre,
+            precio: prodRuta.precio,
+            cantidad: prodRuta.cantidad,
+          });
+        }
+      }
+      // Convertimos el mapa a un array
+      const updatedProducts = Array.from(newProd.values());
+
+      // Actualizamos la base de datos con los nuevos productos
+      await RutasProductosSchemas.updateOne(
+        { ruta: id },
+        { productos: updatedProducts },
+      );
+
+      // Emitimos los eventos
+      io.emit('updateProdRuta', updatedProducts);
+      io.emit('updateProd');
+    } catch (error) {
+      console.error('Error', error);
+    }
+  }
+
+  async actualizarCantidadCambio(id: string, productos: ProductoCambio[]) {
+    try {
+      const ruta: RutasProductosType | null =
+        await RutasProductosSchemas.findOne({ ruta: id });
+
+      if (!ruta) return;
+
+      const newProd = new Map<string, Productos>(); // Usamos un mapa para evitar duplicados.
+
+      for (const prodRuta of ruta.productos) {
+        // Busca si el producto de la ruta está en la factura
+        const prodFac = productos.find((p) => p.nombre === prodRuta.nombre);
+
+        if (prodFac) {
+          // Si el producto está en la factura, actualiza la cantidad
+          const nuevaCantidad = prodRuta.cantidad - prodFac.cantidad;
+
+          newProd.set(prodRuta.id, {
+            id: prodRuta.id,
+            nombre: prodRuta.nombre,
+            precio: prodRuta.precio,
+            cantidad: nuevaCantidad,
+          });
+        } else {
+          // Si el producto no está en la factura, lo agregamos tal cual
+          newProd.set(prodRuta.id, {
+            id: prodRuta.id,
+            nombre: prodRuta.nombre,
+            precio: prodRuta.precio,
+            cantidad: prodRuta.cantidad,
+          });
+        }
+      }
+
+      // Convertimos el mapa a un array
+      const updatedProducts = Array.from(newProd.values());
+
+      // Actualizamos la base de datos con los nuevos productos
+      await RutasProductosSchemas.updateOne(
+        { ruta: id },
+        { productos: updatedProducts },
+      );
+
+      // Emitimos los eventos
+      io.emit('updateProdRuta', updatedProducts);
+      io.emit('updateProd');
+    } catch (error) {
+      console.error('Error', error);
+    }
+  }
+  async actualizarCantidadCambioUpdate(id: string, newProductos: ProductoCambio[], oldProductos: ProductoCambio[]) {
     try {
       const ruta: RutasProductosType | null =
         await RutasProductosSchemas.findOne({ ruta: id });
