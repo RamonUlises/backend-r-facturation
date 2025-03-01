@@ -113,6 +113,25 @@ class DevolucionesController {
       res.status(500).json({ message: 'Error al eliminar la devolución' });
     }
   }
+  async obtenerDevolucionesFacturador(req: Request, res: Response) {
+    try {
+      const { facturador } = req.params as { facturador: string };
+
+      if (!facturador) {
+        return res.status(400).json({ message: 'Faltan datos' });
+      }
+
+      const devoluciones = await DevolucionesModels.ObtenerDevolucionesFacturador(facturador);
+
+      if (devoluciones.length === 0) {
+        return res.status(404).json({ message: 'No hay devoluciones' });
+      }
+
+      res.status(200).json(devoluciones);
+    } catch {
+      res.status(500).json({ message: 'Error al obtener las devoluciones' });
+    }
+  }
 }
 
 export default new DevolucionesController();

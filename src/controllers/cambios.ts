@@ -82,6 +82,25 @@ class CambiosController {
       res.status(500).json({ message: 'Error al eliminar cambio' });
     }
   }
+  async obtenerCambiosFacturador(req: Request, res: Response) {
+    try {
+      const { facturador } = req.params as { facturador: string };
+
+      if (!facturador) {
+        return res.status(400).json({ message: 'Faltan datos' });
+      }
+
+      const cambios = await CambiosModels.obtenerCambiosFacturador(facturador);
+
+      if(cambios.length === 0) {
+        return res.status(404).json({ message: 'Cambio no encontrados' });
+      }
+
+      res.status(200).json(cambios);
+    } catch {
+      res.status(500).json({ message: 'Error al obtener cambios' });
+    }
+  }
 }
 
 export default new CambiosController();

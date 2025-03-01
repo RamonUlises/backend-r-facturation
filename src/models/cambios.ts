@@ -74,6 +74,14 @@ class CambiosModels {
       return 'Error al eliminar cambio';
     }
   }
+  async obtenerCambiosFacturador(id: string) {
+    try {
+      const cambios = await CambiosSchemas.find({ facturador: id });
+      return cambios;
+    } catch {
+      return [];
+    }
+  }
 }
 
 export default new CambiosModels();

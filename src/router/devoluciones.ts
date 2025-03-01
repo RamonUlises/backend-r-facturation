@@ -19,4 +19,8 @@ router.delete('/:id', (req, res) => {
   void DevolucionesController.eliminarDevolucion(req, res);
 });
 
+router.get('/rutas/:facturador', (req, res) => {
+  void DevolucionesController.obtenerDevolucionesFacturador(req, res);
+});
+
 export default router;

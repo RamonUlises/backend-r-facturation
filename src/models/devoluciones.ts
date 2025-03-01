@@ -60,6 +60,15 @@ class DevolucionesModels {
       return 'Error al eliminar la devolución';
     }
   }
+  async ObtenerDevolucionesFacturador(id: string) {
+    try {
+      const devoluciones = await DevolucionesSchemas.find({ facturador: id });
+      return devoluciones;
+    } catch {
+      return [];
+    }
+  }
+    
 }
 
 export default new DevolucionesModels();
