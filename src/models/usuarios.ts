@@ -33,7 +33,7 @@ class UsuariosModels {
       return null;
     }
   }
-  async crearUsuario(usuario: string, password: string) {
+  async crearUsuario(usuario: string, password: string, dias: string[]) {
     try {
       const user: UsuariosTypes | null = await UsuariosSchemas.findOne({
         usuario,
@@ -46,14 +46,14 @@ class UsuariosModels {
       const id = crypto.randomUUID();
       const idRutaPrd = crypto.randomUUID();
 
-      await UsuariosSchemas.create({ id, usuario, password });
+      await UsuariosSchemas.create({ id, usuario, password, dias });
       await RutasProductosSchemas.create({
         id: idRutaPrd,
         ruta: id,
         productos: [],
       });
 
-      io.emit('rutaAdd', { id, usuario, password });
+      io.emit('rutaAdd', { id, usuario, password, dias });
 
       return 'Usuario creado';
     } catch {

@@ -2,8 +2,10 @@ import io from '@/app';
 import { encrypt } from '@/lib/encrypt';
 import UsuariosModels from '@/models/usuarios';
 import { ProductoType } from '@/types/productos';
+import { RegistroType } from '@/types/registro';
 import { Productos } from '@/types/rutasProductos';
 import { Request, Response } from 'express';
+import RegistroModel from '@/models/registro';
 
 class UsuariosControllers {
   async obtenerUsuarios(req: Request, res: Response) {
@@ -40,9 +42,10 @@ class UsuariosControllers {
   }
   async crearUsuario(req: Request, res: Response) {
     try {
-      const { usuario, password } = req.body as {
+      const { usuario, password, dias } = req.body as {
         usuario: string;
         password: string;
+        dias: string[];
       };
 
       if (!usuario || !password) {
@@ -51,9 +54,13 @@ class UsuariosControllers {
           .json({ message: 'Usuario y contraseña requeridos' });
       }
 
+      if(!Array.isArray(dias)){
+        return res.status(400).json({ message: 'Dias debe ser un array' });
+      }
+
       const newPassword = encrypt(password);
 
-      const result = await UsuariosModels.crearUsuario(usuario, newPassword);
+      const result = await UsuariosModels.crearUsuario(usuario, newPassword, dias);
 
       if (result === 'Usuario ya existe') {
         return res.status(400).json({ message: result });
@@ -172,9 +179,10 @@ class UsuariosControllers {
   async actualizarProductosRuta(req: Request, res: Response){
     try {
       const { ruta } = req.params as { ruta: string };
-      const { productos, newProductos } = req.body as { productos: Productos[], newProductos: ProductoType[] };
+      const { productos, newProductos, registro } = req.body as { productos: Productos[], newProductos: ProductoType[], registro: RegistroType };
 
       const response = await UsuariosModels.actualizarProductosRuta(ruta, productos, newProductos);
+      await RegistroModel.actualizarRegistro(registro);
 
       if(response === 'Ruta no encontrada'){
         res.status(404).json({ message: response });
