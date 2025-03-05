@@ -6,13 +6,13 @@ const router = Router();
 const latestVersion = {
   version: '1.1.2',
   notes: 'Nueva actualización',
-  pub_date: '2025-01-30T12:00:00Z',
+  pub_date: '2025-03-05T12:00:00Z',
   platforms: {
     windows: {
-      url: 'https://aricab.nextstep-web.online/aplicacion/actualizar/aricab_1.1.2_x64-setup.exe',
+      url: 'https://aricab.nextstep-web.online/aplicacion/actualizar/aricab_1.2.0_x64-setup.exe',
     },
     linux: {
-      url: 'https://aricab.nextstep-web.online/aplicacion/actualizar/aricab_1.1.2_amd64.deb',
+      url: 'https://aricab.nextstep-web.online/aplicacion/actualizar/aricab_1.2.0_amd64.deb',
     }
   }
 };
