@@ -401,6 +401,30 @@ class UsuariosModels {
       console.error('Error', error);
     }
   }
+  async actualizarPrecioProducto(idProd: string, precio: number) {
+    try {
+      const rutas = await RutasProductosSchemas.find();
+
+      await Promise.all(
+        rutas.map(async (ruta) => {
+          const productos = ruta.productos.map((prd) => {
+            if (prd.id === idProd) {
+              prd.precio = precio;
+            }
+
+            return prd;
+          });
+
+          await RutasProductosSchemas.updateOne(
+            { ruta: ruta.ruta },
+            { productos },
+          );
+        }),
+      );
+    } catch (error) {
+      console.error('Error', error);
+    }
+  }
 }
 
 export default new UsuariosModels();
