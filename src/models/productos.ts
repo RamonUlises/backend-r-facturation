@@ -1,5 +1,6 @@
 import { ProductosSchema } from '@/schemas/productos';
 import { ProductoType } from '@/types/productos';
+import UsuariosModels from '@/models/usuarios';
 
 class ProductosModels {
   async obtenerProductos() {
@@ -68,6 +69,7 @@ class ProductosModels {
       }
 
       await ProductosSchema.updateOne({ id }, { nombre, cantidad, precioCompra, precioVenta });
+      await UsuariosModels.actualizarPrecioProducto(id, precioVenta);
 
       return 'Producto actualizado';
     } catch {
