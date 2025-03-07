@@ -1,5 +1,6 @@
 import { ClientesSchema } from '@/schemas/clientes';
 import { ClienteType } from '@/types/clientes';
+import FacturasModels from '@/models/facturas';
 
 class ClientesModels {
   async obtenerClientes() {
@@ -63,6 +64,9 @@ class ClientesModels {
       }
 
       await ClientesSchema.updateOne({ id }, { nombres, direccion, telefono });
+
+      // Actualizar nombre en las facturas
+      await FacturasModels.actualizarClienteFactura(cliente.nombres, nombres);
 
       return 'Cliente actualizado';
     } catch {
