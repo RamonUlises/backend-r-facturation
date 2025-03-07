@@ -117,6 +117,17 @@ class FacturasModels {
       return [];
     }
   }
+  async actualizarClienteFactura(lastName: string, newName: string) {
+    try {
+      await FacturasSchemas.updateMany({ nombre: lastName }, { nombre: newName });
+
+      io.emit('updateName');
+
+      return 'Facturas actualizadas';
+    } catch {
+      return 'Error al actualizar las facturas';
+    }
+  }
 }
 
 export default new FacturasModels();
