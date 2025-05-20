@@ -41,7 +41,7 @@ class FacturasModels {
       await FacturasSchemas.create({ ...factura, total: Math.ceil(suma) });
       await UsuarioModels.actualizarCantidad(factura['id-facturador'], factura.productos);
 
-      io.emit('facturaAdd', { id: factura.id, nombre: factura.nombre, fecha: factura.fecha, productos: factura.productos, tipo: factura.tipo, total: suma, pagado: factura.pagado, 'id-facturador': factura['id-facturador'] });
+      io.emit('facturaAdd', { id: factura.id, nombre: factura.nombre, fecha: factura.fecha, productos: factura.productos, tipo: factura.tipo, total: Math.ceil(suma), pagado: factura.pagado, 'id-facturador': factura['id-facturador'] });
 
       return 'Factura creada';
     } catch(err) {
@@ -67,7 +67,7 @@ class FacturasModels {
       await FacturasSchemas.updateOne({ id }, { productos, total: Math.ceil(suma), tipo, pagado });
       await UsuarioModels.actualizarCantidadUpdate(factur['id-facturador'], productos, factur.productos);
 
-      io.emit('facturaUpdate', { id, productos, total: suma, tipo, pagado, facturador: factur['id-facturador'] });
+      io.emit('facturaUpdate', { id, productos, total: Math.ceil(suma), tipo, pagado, facturador: factur['id-facturador'] });
 
       return 'Factura actualizada';
     } catch {
