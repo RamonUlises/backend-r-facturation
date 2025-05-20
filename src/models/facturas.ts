@@ -38,7 +38,7 @@ class FacturasModels {
         0,
       );
 
-      await FacturasSchemas.create({ ...factura, total: suma });
+      await FacturasSchemas.create({ ...factura, total: Math.ceil(suma) });
       await UsuarioModels.actualizarCantidad(factura['id-facturador'], factura.productos);
 
       io.emit('facturaAdd', { id: factura.id, nombre: factura.nombre, fecha: factura.fecha, productos: factura.productos, tipo: factura.tipo, total: suma, pagado: factura.pagado, 'id-facturador': factura['id-facturador'] });
