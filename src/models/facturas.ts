@@ -64,7 +64,7 @@ class FacturasModels {
         0,
       );
 
-      await FacturasSchemas.updateOne({ id }, { productos, total: suma, tipo, pagado });
+      await FacturasSchemas.updateOne({ id }, { productos, total: Math.ceil(suma), tipo, pagado });
       await UsuarioModels.actualizarCantidadUpdate(factur['id-facturador'], productos, factur.productos);
 
       io.emit('facturaUpdate', { id, productos, total: suma, tipo, pagado, facturador: factur['id-facturador'] });
