@@ -84,13 +84,13 @@ class CambiosController {
   }
   async obtenerCambiosFacturador(req: Request, res: Response) {
     try {
-      const { facturador } = req.params as { facturador: string };
+      const { facturador, fecha } = req.params;
 
       if (!facturador) {
         return res.status(400).json({ message: 'Faltan datos' });
       }
 
-      const cambios = await CambiosModels.obtenerCambiosFacturador(facturador);
+      const cambios = await CambiosModels.obtenerCambiosFacturador(facturador, fecha);
 
       if(cambios.length === 0) {
         return res.status(404).json({ message: 'Cambio no encontrados' });

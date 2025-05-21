@@ -108,15 +108,32 @@ class FacturasModels {
       return 'Error al abonar la factura';
     }
   }
-  async obtenerFacturasFacturador(id: string) {
+  async obtenerFacturasFacturador(id: string, fecha: string) {
     try {
-      const facturas: FacturaType[] = await FacturasSchemas.find({ 'id-facturador': id });
-
+      const date = new Date(fecha);
+  
+      // Rango del día completo en la zona horaria del servidor
+      const inicioDelDia = new Date(date);
+      inicioDelDia.setHours(0, 0, 0, 0);
+  
+      const finDelDia = new Date(date);
+      finDelDia.setHours(23, 59, 59, 999);
+  
+      const facturas: FacturaType[] = await FacturasSchemas.find({
+        'id-facturador': id,
+        fecha: {
+          $gte: inicioDelDia,
+          $lte: finDelDia,
+        },
+      });
+  
       return facturas;
-    } catch {
+    } catch (error) {
+      console.error('Error al obtener facturas:', error);
       return [];
     }
   }
+  
   async actualizarClienteFactura(lastName: string, newName: string) {
     try {
       await FacturasSchemas.updateMany({ nombre: lastName }, { nombre: newName });

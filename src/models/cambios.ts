@@ -74,9 +74,21 @@ class CambiosModels {
       return 'Error al eliminar cambio';
     }
   }
-  async obtenerCambiosFacturador(id: string) {
+  async obtenerCambiosFacturador(id: string, fecha: string) {
     try {
-      const cambios = await CambiosSchemas.find({ facturador: id });
+      const date = new Date(fecha);
+  
+      // Rango del día completo en la zona horaria del servidor
+      const inicioDelDia = new Date(date);
+      inicioDelDia.setHours(0, 0, 0, 0);
+  
+      const finDelDia = new Date(date);
+      finDelDia.setHours(23, 59, 59, 999);
+
+      const cambios = await CambiosSchemas.find({ 
+        facturador: id,
+        fecha: { $gte: inicioDelDia, $lte: finDelDia },
+      });
       return cambios;
     } catch {
       return [];

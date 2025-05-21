@@ -115,13 +115,13 @@ class DevolucionesController {
   }
   async obtenerDevolucionesFacturador(req: Request, res: Response) {
     try {
-      const { facturador } = req.params as { facturador: string };
+      const { facturador, fecha } = req.params as { facturador: string, fecha: string };
 
       if (!facturador) {
         return res.status(400).json({ message: 'Faltan datos' });
       }
 
-      const devoluciones = await DevolucionesModels.ObtenerDevolucionesFacturador(facturador);
+      const devoluciones = await DevolucionesModels.ObtenerDevolucionesFacturador(facturador, fecha);
 
       if (devoluciones.length === 0) {
         return res.status(404).json({ message: 'No hay devoluciones' });

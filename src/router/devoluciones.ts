@@ -19,7 +19,7 @@ router.delete('/:id', (req, res) => {
   void DevolucionesController.eliminarDevolucion(req, res);
 });
 
-router.get('/rutas/:facturador', (req, res) => {
+router.get('/rutas/:facturador/fecha/:fecha', (req, res) => {
   void DevolucionesController.obtenerDevolucionesFacturador(req, res);
 });
 

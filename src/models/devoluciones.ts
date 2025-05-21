@@ -60,9 +60,24 @@ class DevolucionesModels {
       return 'Error al eliminar la devolución';
     }
   }
-  async ObtenerDevolucionesFacturador(id: string) {
+  async ObtenerDevolucionesFacturador(id: string, fecha: string) {
     try {
-      const devoluciones = await DevolucionesSchemas.find({ facturador: id });
+      const date = new Date(fecha);
+  
+      // Rango del día completo en la zona horaria del servidor
+      const inicioDelDia = new Date(date);
+      inicioDelDia.setHours(0, 0, 0, 0);
+  
+      const finDelDia = new Date(date);
+      finDelDia.setHours(23, 59, 59, 999);
+
+      const devoluciones = await DevolucionesSchemas.find({ 
+        facturador: id,
+        fecha: {
+          $gte: inicioDelDia,
+          $lte: finDelDia,
+        },
+      });
       return devoluciones;
     } catch {
       return [];

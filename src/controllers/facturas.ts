@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import FacturasModels from '../models/facturas';
 import { ProductoFacturaType } from '@/types/facturas';
+import DevolucionesModels from '../models/devoluciones';
+import CambiosModels from '../models/cambios';
 
 class FacturasControllers {
   async obtenerFacturas(req: Request, res: Response) {
@@ -142,9 +144,9 @@ class FacturasControllers {
   }
   async obtenerFacturasFacturador(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const { id, fecha } = req.params;
 
-      const facturas = await FacturasModels.obtenerFacturasFacturador(id);
+      const facturas = await FacturasModels.obtenerFacturasFacturador(id, fecha);
 
       if (facturas.length === 0) {
         return res.status(404).json({ message: 'No hay facturas' });
@@ -153,6 +155,19 @@ class FacturasControllers {
       return res.status(200).json(facturas);
     } catch {
       res.status(500).json({ message: 'Error al obtener facturas' });
+    }
+  }
+  async obtenerResumenFacturasFacturador(req: Request, res: Response) {
+    try {
+      const { id, fecha } = req.params;
+
+      const facturas = await FacturasModels.obtenerFacturasFacturador(id, fecha);
+      const devoluciones = await DevolucionesModels.ObtenerDevolucionesFacturador(id, fecha);
+      const cambios = await CambiosModels.obtenerCambiosFacturador(id, fecha);
+
+      return res.status(200).json({ facturas, devoluciones, cambios });
+    } catch {
+      res.status(500).json({ message: 'Error al obtener resumen de facturas' });
     }
   }
 }
