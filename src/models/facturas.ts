@@ -108,15 +108,32 @@ class FacturasModels {
       return 'Error al abonar la factura';
     }
   }
-  async obtenerFacturasFacturador(id: string) {
+  async obtenerFacturasFacturador(id: string, fecha: string) {
     try {
-      const facturas: FacturaType[] = await FacturasSchemas.find({ 'id-facturador': id });
-
+      const localDate = new Date(fecha); // Este ya está en UTC-6 por el string que envías
+  
+      // Calculamos el inicio y fin del día en UTC-6, pero convertimos al UTC real que maneja el servidor
+      const inicioDelDia = new Date(localDate);
+      inicioDelDia.setUTCHours(6, 0, 0, 0); // UTC-6 => 00:00 en local es 06:00 en UTC
+  
+      const finDelDia = new Date(localDate);
+      finDelDia.setUTCHours(29, 59, 59, 999); // 23:59 en UTC-6 es 05:59 del día siguiente en UTC
+  
+      const facturas: FacturaType[] = await FacturasSchemas.find({
+        'id-facturador': id,
+        fecha: {
+          $gte: inicioDelDia,
+          $lte: finDelDia,
+        },
+      });
+  
       return facturas;
-    } catch {
+    } catch (error) {
+      console.error('Error al obtener facturas:', error);
       return [];
     }
-  }
+  }  
+  
   async actualizarClienteFactura(lastName: string, newName: string) {
     try {
       await FacturasSchemas.updateMany({ nombre: lastName }, { nombre: newName });

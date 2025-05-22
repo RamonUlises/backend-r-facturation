@@ -60,9 +60,24 @@ class DevolucionesModels {
       return 'Error al eliminar la devolución';
     }
   }
-  async ObtenerDevolucionesFacturador(id: string) {
+  async ObtenerDevolucionesFacturador(id: string, fecha: string) {
     try {
-      const devoluciones = await DevolucionesSchemas.find({ facturador: id });
+      const localDate = new Date(fecha); // Este ya está en UTC-6 por el string que envías
+  
+      // Calculamos el inicio y fin del día en UTC-6, pero convertimos al UTC real que maneja el servidor
+      const inicioDelDia = new Date(localDate);
+      inicioDelDia.setUTCHours(6, 0, 0, 0); // UTC-6 => 00:00 en local es 06:00 en UTC
+  
+      const finDelDia = new Date(localDate);
+      finDelDia.setUTCHours(29, 59, 59, 999); // 23:59 en UTC-6 es 05:59 del día siguiente en UTC
+
+      const devoluciones = await DevolucionesSchemas.find({ 
+        facturador: id,
+        fecha: {
+          $gte: inicioDelDia,
+          $lte: finDelDia,
+        },
+      });
       return devoluciones;
     } catch {
       return [];

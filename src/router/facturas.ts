@@ -27,8 +27,12 @@ router.put('/abonar/:id', (req, res) => {
   void FacturasControllers.abonarFactura(req, res);
 });
 
-router.get('/rutas/:id', (req, res) => {
+router.get('/rutas/:id/fecha/:fecha', (req, res) => {
   void FacturasControllers.obtenerFacturasFacturador(req, res);
+});
+
+router.get('/resumen/:id/fecha/:fecha', (req, res) => {
+  void FacturasControllers.obtenerResumenFacturasFacturador(req, res);
 });
 
 export default router;
