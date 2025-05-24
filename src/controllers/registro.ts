@@ -18,12 +18,13 @@ class RegistroController {
   }
   async crearRegistro(req: Request, res: Response) {
     try {
-      const { ruta, fechaInicio, fechaFin, productos, sobrantes } = req.body as {
+      const { ruta, fechaInicio, fechaFin, productos, sobrantes, cambios } = req.body as {
         ruta: string;
         fechaInicio: string;
         fechaFin: string;
         productos: ProductosDiasType;
         sobrantes: Record<string, number>;
+        cambios: Record<string, number>;
       };
 
       if (!ruta || !fechaInicio || !fechaFin) {
@@ -40,6 +41,7 @@ class RegistroController {
         fechaFin,
         productos,
         sobrantes,
+        cambios,
       );
 
       if(response === 'Error al crear el registro') {

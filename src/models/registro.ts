@@ -23,6 +23,7 @@ class RegistroModel {
     fechaFin: string,
     productos: ProductosDiasType,
     sobrantes: Record<string, number>,
+    cambios: Record<string, number>,
   ) {
     try {
       const registros = await RegistroSchemas.find({ ruta });
@@ -41,6 +42,7 @@ class RegistroModel {
         fechaFin,
         productos,
         sobrantes,
+        cambios,
       });
 
       io.emit('registroAdd', {
@@ -50,6 +52,7 @@ class RegistroModel {
         fechaFin,
         productos,
         sobrantes,
+        cambios,
         terminada: false,
       });
 
