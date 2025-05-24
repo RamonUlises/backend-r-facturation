@@ -48,7 +48,7 @@ class ProductosControllers {
         precioVenta: number;
       };
 
-      if (!nombre || !cantidad || !precioCompra || !precioVenta) {
+      if (!nombre || !precioCompra || !precioVenta) {
         return res.status(400).json({ message: 'Datos requeridos' });
       }
 
@@ -88,7 +88,7 @@ class ProductosControllers {
         cantidad: number;
       };
 
-      if (!id || !nombre || !precioCompra || !cantidad || !precioVenta) {
+      if (!id || !nombre || !precioCompra || !precioVenta) {
         return res.status(400).json({ message: 'Datos requeridos' });
       }
 
