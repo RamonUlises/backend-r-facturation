@@ -428,8 +428,6 @@ class UsuariosModels {
         const cambioOld = cambiosAnteriores[prodRuta.nombre];
         const cambioNew = cambiosNuevos[prodRuta.nombre];
 
-        console.log(cambioOld, cambioNew);
-
         if (cambioNew && cambioOld) {
           let newCambio = cambioOld;
           
@@ -452,8 +450,6 @@ class UsuariosModels {
           cambiosNuevos[prodRuta.nombre] = cambios[prodRuta.nombre] || 0;
         }
       }
-
-      console.log(cambiosNuevos);
 
       await RegistroSchemas.updateOne(
         { id: registro.id },
