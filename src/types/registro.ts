@@ -7,5 +7,6 @@ export interface RegistroType {
   fechaFin: string;
   productos: Record<string, ProductosDiasType>;
   sobrantes: Record<string, number>;
+  cambios: Record<string, number>;
   terminada: boolean;
 }

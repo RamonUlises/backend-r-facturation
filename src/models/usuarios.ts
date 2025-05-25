@@ -9,6 +9,8 @@ import { ProductosSchema } from '@/schemas/productos';
 import crypto from 'node:crypto';
 import { ProductoFacturaType } from '@/types/facturas';
 import { ProductoCambio } from '@/types/cambios';
+import { RegistroSchemas } from '@/schemas/registro';
+import { RegistroType } from '@/types/registro';
 
 class UsuariosModels {
   async obtenerUsuarios() {
@@ -218,7 +220,11 @@ class UsuariosModels {
       console.error('Error', error);
     }
   }
-  async actualizarCantidadUpdate(id: string, newProductos: ProductoFacturaType[], oldProductos: ProductoFacturaType[]) {
+  async actualizarCantidadUpdate(
+    id: string,
+    newProductos: ProductoFacturaType[],
+    oldProductos: ProductoFacturaType[],
+  ) {
     try {
       const ruta: RutasProductosType | null =
         await RutasProductosSchemas.findOne({ ruta: id });
@@ -231,12 +237,14 @@ class UsuariosModels {
         const prodOld = oldProductos.find((p) => p.nombre === prodRuta.nombre);
         const prodNew = newProductos.find((p) => p.nombre === prodRuta.nombre);
 
-        if(prodNew && prodOld){
+        if (prodNew && prodOld) {
           let newCantidad = prodRuta.cantidad;
-          if(prodNew.cantidad > prodOld.cantidad){
-            newCantidad = prodRuta.cantidad - (prodNew.cantidad - prodOld.cantidad);
-          } else if(prodNew.cantidad < prodOld.cantidad){
-            newCantidad = prodRuta.cantidad + (prodOld.cantidad - prodNew.cantidad);
+          if (prodNew.cantidad > prodOld.cantidad) {
+            newCantidad =
+              prodRuta.cantidad - (prodNew.cantidad - prodOld.cantidad);
+          } else if (prodNew.cantidad < prodOld.cantidad) {
+            newCantidad =
+              prodRuta.cantidad + (prodOld.cantidad - prodNew.cantidad);
           }
 
           newProd.set(prodRuta.id, {
@@ -245,14 +253,14 @@ class UsuariosModels {
             precio: prodRuta.precio,
             cantidad: newCantidad,
           });
-        } else if(prodOld && !prodNew){
+        } else if (prodOld && !prodNew) {
           newProd.set(prodRuta.id, {
             id: prodRuta.id,
             nombre: prodRuta.nombre,
             precio: prodRuta.precio,
             cantidad: prodRuta.cantidad + prodOld.cantidad,
           });
-        } else if(prodNew && !prodOld){
+        } else if (prodNew && !prodOld) {
           newProd.set(prodRuta.id, {
             id: prodRuta.id,
             nombre: prodRuta.nombre,
@@ -335,25 +343,57 @@ class UsuariosModels {
       console.error('Error', error);
     }
   }
-  async actualizarCantidadCambioUpdate(id: string, newProductos: ProductoCambio[], oldProductos: ProductoCambio[]) {
+  async actualizarCantidadCambioUpdate(
+    id: string,
+    newProductos: ProductoCambio[],
+    oldProductos: ProductoCambio[],
+  ) {
     try {
       const ruta: RutasProductosType | null =
         await RutasProductosSchemas.findOne({ ruta: id });
 
       if (!ruta) return;
 
+      const registro: RegistroType | null = await RegistroSchemas.findOne({
+        ruta: id,
+        terminada: false,
+      });
+
+      if (!registro) return 'Registro no encontrado';
+
+      const cambiosAnteriores: Record<string, number> = oldProductos.reduce<
+        Record<string, number>
+      >((acc, p) => { 
+        acc[p.nombre] = p.cantidad;
+        return acc;
+      }
+      , {});
+      
+      const cambiosNuevos: Record<string, number> = newProductos.reduce<Record<string, number>>(
+        (acc, p) => {
+          acc[p.nombre] = p.cantidad;
+          return acc;
+        },
+        {}
+      );
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const cambios: Record<string, number> = JSON.parse(JSON.stringify(registro.cambios));
+
       const newProd = new Map<string, Productos>(); // Usamos un mapa para evitar duplicados.
 
       for (const prodRuta of ruta.productos) {
         const prodOld = oldProductos.find((p) => p.nombre === prodRuta.nombre);
         const prodNew = newProductos.find((p) => p.nombre === prodRuta.nombre);
-
-        if(prodNew && prodOld){
+        
+        if (prodNew && prodOld) {
           let newCantidad = prodRuta.cantidad;
-          if(prodNew.cantidad > prodOld.cantidad){
-            newCantidad = prodRuta.cantidad - (prodNew.cantidad - prodOld.cantidad);
-          } else if(prodNew.cantidad < prodOld.cantidad){
-            newCantidad = prodRuta.cantidad + (prodOld.cantidad - prodNew.cantidad);
+          if (prodNew.cantidad > prodOld.cantidad) {
+            newCantidad =
+              prodRuta.cantidad - (prodNew.cantidad - prodOld.cantidad);
+          } else if (prodNew.cantidad < prodOld.cantidad) {
+            newCantidad =
+              prodRuta.cantidad + (prodOld.cantidad - prodNew.cantidad);
           }
 
           newProd.set(prodRuta.id, {
@@ -362,14 +402,14 @@ class UsuariosModels {
             precio: prodRuta.precio,
             cantidad: newCantidad,
           });
-        } else if(prodOld && !prodNew){
+        } else if (prodOld && !prodNew) {
           newProd.set(prodRuta.id, {
             id: prodRuta.id,
             nombre: prodRuta.nombre,
             precio: prodRuta.precio,
             cantidad: prodRuta.cantidad + prodOld.cantidad,
           });
-        } else if(prodNew && !prodOld){
+        } else if (prodNew && !prodOld) {
           newProd.set(prodRuta.id, {
             id: prodRuta.id,
             nombre: prodRuta.nombre,
@@ -384,7 +424,42 @@ class UsuariosModels {
             cantidad: prodRuta.cantidad,
           });
         }
+
+        const cambioOld = cambiosAnteriores[prodRuta.nombre];
+        const cambioNew = cambiosNuevos[prodRuta.nombre];
+
+        console.log(cambioOld, cambioNew);
+
+        if (cambioNew && cambioOld) {
+          let newCambio = cambioOld;
+          
+          if(cambioNew > cambioOld){
+            newCambio = cambios[prodRuta.nombre] + (cambioNew - cambioOld);
+          } else if(cambioNew < cambioOld){
+            newCambio = cambios[prodRuta.nombre] - (cambioOld - cambioNew);
+          } else {
+            newCambio = cambios[prodRuta.nombre];
+          }
+          
+          cambiosNuevos[prodRuta.nombre] = newCambio;
+        } else if (cambioOld && !cambioNew) { 
+          cambiosNuevos[prodRuta.nombre] = cambios[prodRuta.nombre] - cambioOld;
+        }
+        else if (cambioNew && !cambioOld) {
+          cambiosNuevos[prodRuta.nombre] = cambios[prodRuta.nombre] + cambioNew;
+        }
+        else {
+          cambiosNuevos[prodRuta.nombre] = cambios[prodRuta.nombre] || 0;
+        }
       }
+
+      console.log(cambiosNuevos);
+
+      await RegistroSchemas.updateOne(
+        { id: registro.id },
+        { $set: { cambios: cambiosNuevos } },
+      );
+
       // Convertimos el mapa a un array
       const updatedProducts = Array.from(newProd.values());
 
