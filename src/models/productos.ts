@@ -69,7 +69,7 @@ class ProductosModels {
       }
 
       await ProductosSchema.updateOne({ id }, { nombre, cantidad, precioCompra, precioVenta });
-      await UsuariosModels.actualizarPrecioProducto(id, precioVenta);
+      await UsuariosModels.actualizarPrecioProducto(id, precioVenta, nombre);
 
       return 'Producto actualizado';
     } catch {

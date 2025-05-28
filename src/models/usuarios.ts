@@ -472,7 +472,7 @@ class UsuariosModels {
       console.error('Error', error);
     }
   }
-  async actualizarPrecioProducto(idProd: string, precio: number) {
+  async actualizarPrecioProducto(idProd: string, precio: number, nombre: string) {
     try {
       const rutas = await RutasProductosSchemas.find();
 
@@ -481,6 +481,7 @@ class UsuariosModels {
           const productos = ruta.productos.map((prd) => {
             if (prd.id === idProd) {
               prd.precio = precio;
+              prd.nombre = nombre;
             }
 
             return prd;
