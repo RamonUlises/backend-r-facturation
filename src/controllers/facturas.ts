@@ -105,9 +105,13 @@ class FacturasControllers {
   }
   async eliminarFactura(req: Request, res: Response) {
     try {
-      const { id } = req.params;
+      const { id, facturador } = req.params;
+      
+      if (!facturador) {
+        return res.status(400).json({ message: 'Faltan datos' });
+      }
 
-      const response = await FacturasModels.eliminarFactura(id);
+      const response = await FacturasModels.eliminarFactura(id, facturador);
 
       if (response === 'Error al eliminar la factura') {
         return res.status(400).json({ message: response });

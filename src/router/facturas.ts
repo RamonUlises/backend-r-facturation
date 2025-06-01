@@ -19,7 +19,7 @@ router.put('/:id', (req, res) => {
   void FacturasControllers.actualizarFactura(req, res);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id/facturador/:facturador', (req, res) => {
   void FacturasControllers.eliminarFactura(req, res);
 });
 

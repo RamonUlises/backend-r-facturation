@@ -363,29 +363,29 @@ class UsuariosModels {
 
       const cambiosAnteriores: Record<string, number> = oldProductos.reduce<
         Record<string, number>
-      >((acc, p) => { 
+      >((acc, p) => {
         acc[p.nombre] = p.cantidad;
         return acc;
-      }
-      , {});
-      
-      const cambiosNuevos: Record<string, number> = newProductos.reduce<Record<string, number>>(
-        (acc, p) => {
-          acc[p.nombre] = p.cantidad;
-          return acc;
-        },
-        {}
-      );
+      }, {});
+
+      const cambiosNuevos: Record<string, number> = newProductos.reduce<
+        Record<string, number>
+      >((acc, p) => {
+        acc[p.nombre] = p.cantidad;
+        return acc;
+      }, {});
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const cambios: Record<string, number> = JSON.parse(JSON.stringify(registro.cambios));
+      const cambios: Record<string, number> = JSON.parse(
+        JSON.stringify(registro.cambios),
+      );
 
       const newProd = new Map<string, Productos>(); // Usamos un mapa para evitar duplicados.
 
       for (const prodRuta of ruta.productos) {
         const prodOld = oldProductos.find((p) => p.nombre === prodRuta.nombre);
         const prodNew = newProductos.find((p) => p.nombre === prodRuta.nombre);
-        
+
         if (prodNew && prodOld) {
           let newCantidad = prodRuta.cantidad;
           if (prodNew.cantidad > prodOld.cantidad) {
@@ -430,23 +430,21 @@ class UsuariosModels {
 
         if (cambioNew && cambioOld) {
           let newCambio = cambioOld;
-          
-          if(cambioNew > cambioOld){
+
+          if (cambioNew > cambioOld) {
             newCambio = cambios[prodRuta.nombre] + (cambioNew - cambioOld);
-          } else if(cambioNew < cambioOld){
+          } else if (cambioNew < cambioOld) {
             newCambio = cambios[prodRuta.nombre] - (cambioOld - cambioNew);
           } else {
             newCambio = cambios[prodRuta.nombre];
           }
-          
+
           cambiosNuevos[prodRuta.nombre] = newCambio;
-        } else if (cambioOld && !cambioNew) { 
+        } else if (cambioOld && !cambioNew) {
           cambiosNuevos[prodRuta.nombre] = cambios[prodRuta.nombre] - cambioOld;
-        }
-        else if (cambioNew && !cambioOld) {
+        } else if (cambioNew && !cambioOld) {
           cambiosNuevos[prodRuta.nombre] = cambios[prodRuta.nombre] + cambioNew;
-        }
-        else {
+        } else {
           cambiosNuevos[prodRuta.nombre] = cambios[prodRuta.nombre] || 0;
         }
       }
@@ -472,7 +470,11 @@ class UsuariosModels {
       console.error('Error', error);
     }
   }
-  async actualizarPrecioProducto(idProd: string, precio: number, nombre: string) {
+  async actualizarPrecioProducto(
+    idProd: string,
+    precio: number,
+    nombre: string,
+  ) {
     try {
       const rutas = await RutasProductosSchemas.find();
 
@@ -492,6 +494,53 @@ class UsuariosModels {
             { productos },
           );
         }),
+      );
+    } catch (error) {
+      console.error('Error', error);
+    }
+  }
+  async actualizarCantidadDelete(
+    facturador: string,
+    productos: ProductoFacturaType[],
+  ) {
+    try {
+      const ruta: RutasProductosType | null =
+        await RutasProductosSchemas.findOne({ ruta: facturador });
+
+      // Regresar los productos de la factura a la ruta
+
+      if (!ruta) return;
+
+      const newProd = new Map<string, Productos>(); // Usamos un mapa para evitar duplicados.
+
+      for (const prodRuta of ruta.productos) {
+        // Busca si el producto de la ruta está en la factura
+        const prodFac = productos.find((p) => p.nombre === prodRuta.nombre);
+
+        if (prodFac) {
+          // Si el producto está en la factura, actualiza la cantidad
+          const nuevaCantidad = prodRuta.cantidad + prodFac.cantidad;
+
+          newProd.set(prodRuta.id, {
+            id: prodRuta.id,
+            nombre: prodRuta.nombre,
+            precio: prodRuta.precio,
+            cantidad: nuevaCantidad,
+          });
+        } else {
+          // Si el producto no está en la factura, lo agregamos tal cual
+          newProd.set(prodRuta.id, {
+            id: prodRuta.id,
+            nombre: prodRuta.nombre,
+            precio: prodRuta.precio,
+            cantidad: prodRuta.cantidad,
+          });
+        }
+      }
+
+      await RutasProductosSchemas.updateOne(
+        { ruta: facturador },
+        { productos: Array.from(newProd.values()) },
       );
     } catch (error) {
       console.error('Error', error);

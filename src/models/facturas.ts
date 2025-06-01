@@ -74,7 +74,7 @@ class FacturasModels {
       return 'Error al actualizar la factura';
     }
   }
-  async eliminarFactura(id: string) {
+  async eliminarFactura(id: string, facturador: string) {
     try {
       const factur = await FacturasSchemas.findOne({ id });
 
@@ -83,7 +83,9 @@ class FacturasModels {
       }
 
       await FacturasSchemas.deleteOne({ id });
+      await UsuarioModels.actualizarCantidadDelete(facturador, factur.productos);
       io.emit('facturaDelete', id, factur['id-facturador']);
+      io.emit('updateProd');
 
       return 'Factura eliminada';
     } catch {
