@@ -3,7 +3,7 @@ import FacturasControllers from '../controllers/facturas';
 
 const router = Router();
 
-router.get('/', (req, res) => {
+router.get('/fecha/:fecha', (req, res) => {
   void FacturasControllers.obtenerFacturas(req, res);
 });
 

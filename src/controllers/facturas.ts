@@ -7,7 +7,9 @@ import CambiosModels from '../models/cambios';
 class FacturasControllers {
   async obtenerFacturas(req: Request, res: Response) {
     try {
-      const facturas = await FacturasModels.obtenerFacturas();
+      const { fecha } = req.params;
+
+      const facturas = await FacturasModels.obtenerFacturas(fecha);
 
       if (facturas.length === 0) {
         return res.status(404).json({ message: 'No hay facturas' });
