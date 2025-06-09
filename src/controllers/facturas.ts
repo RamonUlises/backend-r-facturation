@@ -176,6 +176,24 @@ class FacturasControllers {
       res.status(500).json({ message: 'Error al obtener resumen de facturas' });
     }
   }
+  async obtenerCredito(req: Request, res: Response) {
+    try {
+      const credito = await FacturasModels.obtenerCredito();
+
+      return res.status(200).json(credito);
+    } catch {
+      res.status(500).json({ message: 'Error al obtener credito' });
+    }
+  }
+  async obtenerResumenSemanas(req: Request, res: Response) {
+    try {
+      const { facturas1, facturas2, fecha1, fecha2 } = await FacturasModels.obtenerResumenSemanas();
+
+      return res.status(200).json({ facturas1, facturas2, fecha1, fecha2 });
+    } catch {
+      return res.status(500).json({ message: 'Error al obtener resumen de facturas' });
+    }
+  }
 }
 
 export default new FacturasControllers();

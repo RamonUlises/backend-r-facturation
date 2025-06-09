@@ -3,6 +3,7 @@ import { ClientesSchema } from '@/schemas/clientes';
 import { FacturaType, ProductoFacturaType } from '@/types/facturas';
 import UsuarioModels from '@/models/usuarios';
 import io from '@/app';
+import { getMondayUTCMinus6 } from '@/lib/compararFacturas';
 
 class FacturasModels {
   async obtenerFacturas(fecha: string) {
@@ -159,6 +160,61 @@ class FacturasModels {
       return 'Facturas actualizadas';
     } catch {
       return 'Error al actualizar las facturas';
+    }
+  }
+  async obtenerCredito(): Promise<{ count: number, total: number }> {
+    try {
+      const credito = await FacturasSchemas.find({ tipo: 'crédito' });
+
+      const total = credito.reduce((acc: number, factura: FacturaType) => acc + factura.total - factura.pagado, 0);
+
+      const creditoPagado = credito.reduce((acc: number, factura: FacturaType) => {
+        if(factura.pagado === factura.total) return acc;
+
+        return acc + 1;
+      }, 0);
+
+      return { count: creditoPagado, total };
+    } catch {
+      return { count: 0, total: 0 };
+    }
+  }
+  async obtenerResumenSemanas(): Promise<{ facturas1: FacturaType[], facturas2: FacturaType[], fecha1: string, fecha2: string }> {
+    try {
+      const ahora = new Date();
+      const lunesActual = getMondayUTCMinus6(ahora);
+
+      // Semana pasada
+      const lunesSemanaPasada = new Date(lunesActual);
+      lunesSemanaPasada.setUTCDate(lunesSemanaPasada.getUTCDate() - 7);
+      const domingoSemanaPasada = new Date(lunesSemanaPasada);
+      domingoSemanaPasada.setUTCDate(domingoSemanaPasada.getUTCDate() + 6);
+      domingoSemanaPasada.setUTCHours(23, 59, 59, 999);
+
+      // Semana anterior a la pasada
+      const lunesSemanaAnterior = new Date(lunesSemanaPasada);
+      lunesSemanaAnterior.setUTCDate(lunesSemanaAnterior.getUTCDate() - 7);
+      const domingoSemanaAnterior = new Date(lunesSemanaAnterior);
+      domingoSemanaAnterior.setUTCDate(domingoSemanaAnterior.getUTCDate() + 6);
+      domingoSemanaAnterior.setUTCHours(23, 59, 59, 999);
+
+      // Consultas
+      const facturas1: FacturaType[] = await FacturasSchemas.find({
+        fecha: {
+          $gte: lunesSemanaPasada,
+          $lte: domingoSemanaPasada,
+        },
+      });
+      const facturas2: FacturaType[] = await FacturasSchemas.find({
+        fecha: {
+          $gte: lunesSemanaAnterior,
+          $lte: domingoSemanaAnterior,
+        },
+      });
+
+      return { facturas1, facturas2, fecha1: `${lunesSemanaPasada.toLocaleDateString()}-${domingoSemanaPasada.toLocaleDateString()}`, fecha2: `${lunesSemanaAnterior.toLocaleDateString()}-${domingoSemanaAnterior.toLocaleDateString()}` };
+    } catch {
+      return { facturas1: [], facturas2: [], fecha1: '', fecha2: '' };
     }
   }
 }

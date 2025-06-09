@@ -35,4 +35,12 @@ router.get('/resumen/:id/fecha/:fecha', (req, res) => {
   void FacturasControllers.obtenerResumenFacturasFacturador(req, res);
 });
 
+router.get('/estado/credito', (req, res) => {
+  void FacturasControllers.obtenerCredito(req, res);
+});
+
+router.get('/resumen/semanas', (req, res) => {
+  void FacturasControllers.obtenerResumenSemanas(req, res);
+});
+
 export default router;
