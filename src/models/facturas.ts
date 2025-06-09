@@ -268,7 +268,7 @@ class FacturasModels {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
-        })}-${domingoSemanaPasada.toLocaleDateString('es-MX', {
+        })} - ${domingoSemanaPasada.toLocaleDateString('es-MX', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
@@ -277,7 +277,7 @@ class FacturasModels {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
-        })}-${domingoSemanaAnterior.toLocaleDateString('es-MX', {
+        })} - ${domingoSemanaAnterior.toLocaleDateString('es-MX', {
           day: '2-digit',
           month: '2-digit',
           year: 'numeric',
