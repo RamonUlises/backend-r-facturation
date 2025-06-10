@@ -287,6 +287,18 @@ class FacturasModels {
       return { facturas1: [], facturas2: [], fecha1: '', fecha2: '' };
     }
   }
+  async obtenerFacturasCliente(cliente: string, facturador: string) {
+    try {
+      const facturas: FacturaType[] = await FacturasSchemas.find({
+        'id-facturador': facturador,
+        nombre: cliente,
+      });
+
+      return facturas;
+    } catch {
+      return [];
+    }
+  }
 }
 
 export default new FacturasModels();

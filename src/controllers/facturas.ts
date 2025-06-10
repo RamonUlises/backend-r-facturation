@@ -194,6 +194,21 @@ class FacturasControllers {
       return res.status(500).json({ message: 'Error al obtener resumen de facturas' });
     }
   }
+  async obtenerFacturasCliente(req: Request, res: Response) {
+    try {
+      const { cliente, facturador } = req.params;
+
+      const facturas = await FacturasModels.obtenerFacturasCliente(cliente, facturador);
+
+      if (facturas.length === 0) {
+        return res.status(404).json({ message: 'No hay facturas' });
+      }
+
+      return res.status(200).json(facturas);
+    } catch {
+      res.status(500).json({ message: 'Error al obtener facturas' });
+    }
+  }
 }
 
 export default new FacturasControllers();

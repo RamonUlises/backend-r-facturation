@@ -43,4 +43,8 @@ router.get('/resumen/semanas', (req, res) => {
   void FacturasControllers.obtenerResumenSemanas(req, res);
 });
 
+router.get('/clientes/:cliente/facturador/:facturador', (req, res) => {
+  void FacturasControllers.obtenerFacturasCliente(req, res);
+});
+
 export default router;
