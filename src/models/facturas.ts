@@ -205,7 +205,7 @@ class FacturasModels {
 
       const total = credito.reduce(
         (acc: number, factura: FacturaType) =>
-          acc + factura.total - factura.pagado,
+          acc + (factura.total - factura.pagado),
         0,
       );
 
