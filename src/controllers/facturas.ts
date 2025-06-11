@@ -209,6 +209,21 @@ class FacturasControllers {
       res.status(500).json({ message: 'Error al obtener facturas' });
     }
   }
+  async obtenerFacturasRango(req: Request, res: Response) {
+    try {
+      const { fechaInicio, fechaFin } = req.params;
+
+      const facturas = await FacturasModels.obtenerFacturasRango(fechaInicio, fechaFin);
+
+      if (facturas.length === 0) {
+        return res.status(404).json({ message: 'No hay facturas' });
+      }
+
+      return res.status(200).json(facturas);
+    } catch {
+      res.status(500).json({ message: 'Error al obtener factura' });
+    }
+  }
 }
 
 export default new FacturasControllers();

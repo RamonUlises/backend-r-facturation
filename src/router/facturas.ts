@@ -47,4 +47,8 @@ router.get('/clientes/:cliente/facturador/:facturador', (req, res) => {
   void FacturasControllers.obtenerFacturasCliente(req, res);
 });
 
+router.get('/rango/:fechaInicio/:fechaFin', (req, res) => {
+  void FacturasControllers.obtenerFacturasRango(req, res);
+});
+
 export default router;

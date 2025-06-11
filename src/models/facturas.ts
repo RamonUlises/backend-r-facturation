@@ -299,6 +299,29 @@ class FacturasModels {
       return [];
     }
   }
+  async obtenerFacturasRango(fechaInicio: string, fechaFin: string) {
+    try {
+      const localDate = new Date(fechaInicio);
+      const localDate2 = new Date(fechaFin);
+
+      const inicioDelDia = new Date(localDate);
+      inicioDelDia.setUTCHours(6, 0, 0, 0);
+
+      const finDelDia = new Date(localDate2);
+      finDelDia.setUTCHours(29, 59, 59, 999);
+
+      const facturas: FacturaType[] = await FacturasSchemas.find({
+        fecha: {
+          $gte: inicioDelDia,
+          $lte: finDelDia,
+        },
+      });
+
+      return facturas;
+    } catch {
+      return [];
+    }
+  }
 }
 
 export default new FacturasModels();
