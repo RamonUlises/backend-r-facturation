@@ -224,6 +224,19 @@ class FacturasControllers {
       res.status(500).json({ message: 'Error al obtener factura' });
     }
   }
+  async obtenerCreditos(req: Request, res: Response) {
+    try {
+      const creditos = await FacturasModels.obtenerCreditos();
+
+      if (creditos.length === 0) {
+        return res.status(404).json({ message: 'No hay creditos' });
+      }
+
+      return res.status(200).json(creditos);
+    } catch {
+      return res.status(500).json('Error al obtener creditos');
+    }
+  }
 }
 
 export default new FacturasControllers();

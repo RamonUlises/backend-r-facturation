@@ -51,4 +51,8 @@ router.get('/rango/:fechaInicio/:fechaFin', (req, res) => {
   void FacturasControllers.obtenerFacturasRango(req, res);
 });
 
+router.get('/creditos/no-canceladas', (req, res) => {
+  void FacturasControllers.obtenerCreditos(req, res);
+});
+
 export default router;

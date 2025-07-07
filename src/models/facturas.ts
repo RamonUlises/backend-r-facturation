@@ -322,6 +322,18 @@ class FacturasModels {
       return [];
     }
   }
+  async obtenerCreditos() {
+    try {
+      const creditos = await FacturasSchemas.find({
+        tipo: 'crédito',
+        $expr: { $lt: ['$pagado', '$total'] },
+      });
+
+      return creditos;
+    } catch {
+      return [];
+    }
+  }
 }
 
 export default new FacturasModels();
