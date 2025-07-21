@@ -2,8 +2,11 @@ import { FacturasSchemas } from '@/schemas/facturas';
 import { ClientesSchema } from '@/schemas/clientes';
 import { FacturaType, ProductoFacturaType } from '@/types/facturas';
 import UsuarioModels from '@/models/usuarios';
+import ProductosModels from '@/models/productos';
 import io from '@/app';
 import { getMondayUTCMinus6 } from '@/lib/compararFacturas';
+import { RegistroType } from '@/types/registro';
+import { RegistroSchemas } from '@/schemas/registro';
 
 class FacturasModels {
   async obtenerFacturas(fecha: string) {
@@ -70,9 +73,32 @@ class FacturasModels {
         'id-facturador': factura['id-facturador'],
       });
 
+      const productos = await ProductosModels.obtenerProductos();
+
+      const descuento = Math.ceil(
+        factura.productos.reduce((acc, prd) => {
+          const prod = productos.find((p) => p.id === prd.id);
+
+          if (!prod) return acc;
+
+          return acc + (prod.precioVenta - prd.precio) * prd.cantidad;
+        }, 0),
+      );
+
+      const registro: RegistroType | null = await RegistroSchemas.findOne({
+        ruta: factura['id-facturador'],
+        terminada: false,
+      });
+
+      if (registro) {
+        await RegistroSchemas.updateOne(
+          { id: registro.id },
+          { descuentos: registro.descuentos + descuento },
+        );
+      }
+
       return 'Factura creada';
-    } catch (err) {
-      console.log(err);
+    } catch {
       return 'Error al crear la factura';
     }
   }
@@ -115,6 +141,40 @@ class FacturasModels {
         facturador: factur['id-facturador'],
       });
 
+      const prods = await ProductosModels.obtenerProductos();
+
+      const descuentoAnterior = Math.ceil(
+        factur.productos.reduce((acc, prd) => {
+          const prod = prods.find((p) => p.id === prd.id);
+
+          if (!prod) return acc;
+
+          return acc + (prod.precioVenta - prd.precio) * prd.cantidad;
+        }, 0),
+      );
+
+      const descuentoNuevo = Math.ceil(
+        productos.reduce((acc, prd) => {
+          const prod = prods.find((p) => p.id === prd.id);
+
+          if (!prod) return acc;
+
+          return acc + (prod.precioVenta - prd.precio) * prd.cantidad;
+        }, 0),
+      );
+
+      const registro: RegistroType | null = await RegistroSchemas.findOne({
+        ruta: factur['id-facturador'],
+        terminada: false,
+      });
+
+      if (registro) {
+        await RegistroSchemas.updateOne(
+          { id: registro.id },
+          { descuentos: registro.descuentos + (descuentoNuevo - descuentoAnterior) },
+        );
+      }
+
       return 'Factura actualizada';
     } catch {
       return 'Error al actualizar la factura';
@@ -135,6 +195,30 @@ class FacturasModels {
       );
       io.emit('facturaDelete', id, factur['id-facturador']);
       io.emit('updateProd');
+
+      const productos = await ProductosModels.obtenerProductos();
+
+      const descuento = Math.ceil(
+        factur.productos.reduce((acc, prd) => {
+          const prod = productos.find((p) => p.id === prd.id);
+
+          if (!prod) return acc;
+
+          return acc + (prod.precioVenta - prd.precio) * prd.cantidad;
+        }, 0),
+      );
+
+      const registro: RegistroType | null = await RegistroSchemas.findOne({
+        ruta: factur['id-facturador'],
+        terminada: false,
+      });
+
+      if (registro) {
+        await RegistroSchemas.updateOne(
+          { id: registro.id },
+          { descuentos: registro.descuentos - descuento },
+        );
+      }
 
       return 'Factura eliminada';
     } catch {
