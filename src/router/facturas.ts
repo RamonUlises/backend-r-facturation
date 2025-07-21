@@ -31,6 +31,10 @@ router.get('/rutas/:id/fecha/:fecha', (req, res) => {
   void FacturasControllers.obtenerFacturasFacturador(req, res);
 });
 
+router.get('/rutas/:id/fecha/:fecha/total', (req, res) => {
+  void FacturasControllers.obtenerFacturasFacturadorTotal(req, res);
+});
+
 router.get('/resumen/:id/fecha/:fecha', (req, res) => {
   void FacturasControllers.obtenerResumenFacturasFacturador(req, res);
 });
