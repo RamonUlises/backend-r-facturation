@@ -9,6 +9,7 @@ const RegistroSchema = new mongoose.Schema({
   cambios: { type: Map, of: Number, required: true },
   sobrantes: { type: Map, of: Number, required: true },
   terminada: { type: Boolean, default: false },
+  descuentos: { type: Number, default: 0 },
 });
 
 export const RegistroSchemas = mongoose.model('registro', RegistroSchema);
