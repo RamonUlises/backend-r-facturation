@@ -56,7 +56,23 @@ class FacturasModels {
         0,
       );
 
-      await FacturasSchemas.create({ ...factura, total: Math.ceil(suma) });
+      const productos = await ProductosModels.obtenerProductos();
+
+      const descuento = Math.ceil(
+        factura.productos.reduce((acc, prd) => {
+          const prod = productos.find((p) => p.id === prd.id);
+
+          if (!prod) return acc;
+
+          return acc + (prod.precioVenta - prd.precio) * prd.cantidad;
+        }, 0),
+      );
+
+      await FacturasSchemas.create({
+        ...factura,
+        total: Math.ceil(suma),
+        descuento,
+      });
       await UsuarioModels.actualizarCantidad(
         factura['id-facturador'],
         factura.productos,
@@ -71,19 +87,8 @@ class FacturasModels {
         total: Math.ceil(suma),
         pagado: factura.pagado,
         'id-facturador': factura['id-facturador'],
+        descuento,
       });
-
-      const productos = await ProductosModels.obtenerProductos();
-
-      const descuento = Math.ceil(
-        factura.productos.reduce((acc, prd) => {
-          const prod = productos.find((p) => p.id === prd.id);
-
-          if (!prod) return acc;
-
-          return acc + (prod.precioVenta - prd.precio) * prd.cantidad;
-        }, 0),
-      );
 
       const registro: RegistroType | null = await RegistroSchemas.findOne({
         ruta: factura['id-facturador'],
@@ -122,25 +127,6 @@ class FacturasModels {
         0,
       );
 
-      await FacturasSchemas.updateOne(
-        { id },
-        { productos, total: Math.ceil(suma), tipo, pagado },
-      );
-      await UsuarioModels.actualizarCantidadUpdate(
-        factur['id-facturador'],
-        productos,
-        factur.productos,
-      );
-
-      io.emit('facturaUpdate', {
-        id,
-        productos,
-        total: Math.ceil(suma),
-        tipo,
-        pagado,
-        facturador: factur['id-facturador'],
-      });
-
       const prods = await ProductosModels.obtenerProductos();
 
       const descuentoAnterior = Math.ceil(
@@ -163,6 +149,26 @@ class FacturasModels {
         }, 0),
       );
 
+      await FacturasSchemas.updateOne(
+        { id },
+        { productos, total: Math.ceil(suma), tipo, pagado, descuento: descuentoNuevo },
+      );
+      await UsuarioModels.actualizarCantidadUpdate(
+        factur['id-facturador'],
+        productos,
+        factur.productos,
+      );
+
+      io.emit('facturaUpdate', {
+        id,
+        productos,
+        total: Math.ceil(suma),
+        tipo,
+        pagado,
+        facturador: factur['id-facturador'],
+        descuento: descuentoNuevo,
+      });
+
       const registro: RegistroType | null = await RegistroSchemas.findOne({
         ruta: factur['id-facturador'],
         terminada: false,
@@ -171,7 +177,10 @@ class FacturasModels {
       if (registro) {
         await RegistroSchemas.updateOne(
           { id: registro.id },
-          { descuentos: registro.descuentos + (descuentoNuevo - descuentoAnterior) },
+          {
+            descuentos:
+              registro.descuentos + (descuentoNuevo - descuentoAnterior),
+          },
         );
       }
 

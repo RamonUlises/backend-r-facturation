@@ -15,7 +15,8 @@ const FacturaSchema = new mongoose.Schema({
   productos: { type: [Producto], required: true },
   tipo: { type: String, required: true },
   total: { type: Number, required: true },
-  pagado: { type: Number, required: true }
+  pagado: { type: Number, required: true },
+  descuento: { type: Number, required: true },
 });
 
 export const FacturasSchemas = mongoose.model('facturas', FacturaSchema);
