@@ -1,5 +1,4 @@
 import { FacturasSchemas } from '@/schemas/facturas';
-import { ClientesSchema } from '@/schemas/clientes';
 import { FacturaType, ProductoFacturaType } from '@/types/facturas';
 import UsuarioModels from '@/models/usuarios';
 import ProductosModels from '@/models/productos';
@@ -44,12 +43,6 @@ class FacturasModels {
   }
   async crearFactura(factura: FacturaType) {
     try {
-      const cliente = await ClientesSchema.findOne({ nombres: factura.nombre });
-
-      if (!cliente) {
-        return 'Cliente no encontrado';
-      }
-
       const suma = factura.productos.reduce(
         (acc: number, producto: ProductoFacturaType) => {
           return acc + producto.precio * producto.cantidad;
@@ -290,7 +283,7 @@ class FacturasModels {
         factura: factur.id,
         recuperacion: abono,
       });
-      
+
       io.emit('facturaAbonar', { id, total });
 
       return 'Factura abonada';
@@ -323,7 +316,6 @@ class FacturasModels {
       return [];
     }
   }
-
   async actualizarClienteFactura(lastName: string, newName: string) {
     try {
       await FacturasSchemas.updateMany(
@@ -471,6 +463,22 @@ class FacturasModels {
       return creditos;
     } catch {
       return [];
+    }
+  }
+  async cambiarClienteFactura(id: string, cliente: string) {
+    try {
+      const factura = await FacturasSchemas.findOne({ id });
+
+      if (!factura) {
+        return 'No existe la factura';
+      }
+
+      await FacturasSchemas.updateOne({ id }, { nombre: cliente });
+      io.emit('updateName', { id, nombre: cliente });
+
+      return 'Cliente cambiado';
+    } catch {
+      return 'Error al cambiar cliente';
     }
   }
 }

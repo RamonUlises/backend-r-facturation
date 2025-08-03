@@ -70,10 +70,6 @@ class FacturasControllers {
         pagado,
       });
 
-      if (response === 'Cliente no encontrado') {
-        return res.status(404).json({ message: response });
-      }
-
       if (response === 'Error al crear la factura') {
         return res.status(400).json({ message: response });
       }
@@ -310,6 +306,30 @@ class FacturasControllers {
       return res.status(200).json(creditos);
     } catch {
       return res.status(500).json('Error al obtener creditos');
+    }
+  }
+  async cambiarClienteFactura(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { cliente } = req.body as { cliente: string };
+
+      if (!cliente) {
+        return res.status(400).json({ message: 'Faltan datos' });
+      }
+
+      const response = await FacturasModels.cambiarClienteFactura(id, cliente);
+
+      if (response === 'No existe la factura') {
+        return res.status(404).json({ message: response });
+      }
+
+      if (response === 'Error al cambiar cliente') {
+        return res.status(400).json({ message: response });
+      }
+
+      return res.status(200).json({ message: response });
+    } catch {
+      res.status(500).json({ message: 'Error al cambiar cliente' });
     }
   }
 }

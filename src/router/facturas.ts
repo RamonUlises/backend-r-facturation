@@ -63,4 +63,8 @@ router.get('/creditos/no-canceladas', (req, res) => {
   void FacturasControllers.obtenerCreditos(req, res);
 });
 
+router.put('cambiar-cliente/:id', (req, res) => {
+  void FacturasControllers.cambiarClienteFactura(req, res);
+});
+
 export default router;
