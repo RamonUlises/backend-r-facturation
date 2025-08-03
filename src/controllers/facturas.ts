@@ -3,6 +3,7 @@ import FacturasModels from '../models/facturas';
 import { ProductoFacturaType } from '@/types/facturas';
 import DevolucionesModels from '../models/devoluciones';
 import CambiosModels from '../models/cambios';
+import RecuperacionModels from '../models/recuperacion';
 
 class FacturasControllers {
   async obtenerFacturas(req: Request, res: Response) {
@@ -234,8 +235,9 @@ class FacturasControllers {
       const devoluciones =
         await DevolucionesModels.ObtenerDevolucionesFacturador(id, fecha);
       const cambios = await CambiosModels.obtenerCambiosFacturador(id, fecha);
+      const recuperacion = await RecuperacionModels.obtenerRecuperacionesFacturador(id, fecha);
 
-      return res.status(200).json({ facturas, devoluciones, cambios });
+      return res.status(200).json({ facturas, devoluciones, cambios, recuperacion });
     } catch {
       res.status(500).json({ message: 'Error al obtener resumen de facturas' });
     }
