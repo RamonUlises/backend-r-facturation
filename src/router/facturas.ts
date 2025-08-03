@@ -27,6 +27,10 @@ router.put('/abonar/:id', (req, res) => {
   void FacturasControllers.abonarFactura(req, res);
 });
 
+router.put('/abonar/facturador/:id', (req, res) => {
+  void FacturasControllers.abonarFacturaFacturador(req, res);
+});
+
 router.get('/rutas/:id/fecha/:fecha', (req, res) => {
   void FacturasControllers.obtenerFacturasFacturador(req, res);
 });

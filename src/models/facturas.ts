@@ -7,6 +7,7 @@ import io from '@/app';
 import { getMondayUTCMinus6 } from '@/lib/compararFacturas';
 import { RegistroType } from '@/types/registro';
 import { RegistroSchemas } from '@/schemas/registro';
+import { RecuperacionSchemas } from '@/schemas/recuperacion';
 
 class FacturasModels {
   async obtenerFacturas(fecha: string) {
@@ -151,7 +152,13 @@ class FacturasModels {
 
       await FacturasSchemas.updateOne(
         { id },
-        { productos, total: Math.ceil(suma), tipo, pagado, descuento: descuentoNuevo },
+        {
+          productos,
+          total: Math.ceil(suma),
+          tipo,
+          pagado,
+          descuento: descuentoNuevo,
+        },
       );
       await UsuarioModels.actualizarCantidadUpdate(
         factur['id-facturador'],
@@ -245,6 +252,45 @@ class FacturasModels {
       const total = factur.pagado + abono;
 
       await FacturasSchemas.updateOne({ id }, { pagado: total });
+      io.emit('facturaAbonar', { id, total });
+
+      return 'Factura abonada';
+    } catch {
+      return 'Error al abonar la factura';
+    }
+  }
+  async abonarFacturaFacturador(
+    id: string,
+    idRecuperacion: string,
+    abono: number,
+    fecha: string,
+  ) {
+    try {
+      const factur: FacturaType | null = await FacturasSchemas.findOne({ id });
+
+      if (!factur) {
+        return 'Factura no encontrada';
+      }
+
+      const total = factur.pagado + abono;
+
+      await FacturasSchemas.updateOne({ id }, { pagado: total });
+      await RecuperacionSchemas.create({
+        id: idRecuperacion,
+        fecha,
+        facturador: factur['id-facturador'],
+        factura: factur.id,
+        recuperacion: abono,
+      });
+
+      io.emit('recuperacionAdd', {
+        id: idRecuperacion,
+        fecha,
+        facturador: factur['id-facturador'],
+        factura: factur.id,
+        recuperacion: abono,
+      });
+      
       io.emit('facturaAbonar', { id, total });
 
       return 'Factura abonada';
