@@ -474,7 +474,7 @@ class FacturasModels {
       }
 
       await FacturasSchemas.updateOne({ id }, { nombre: cliente });
-      io.emit('updateName', { id, nombre: cliente });
+      io.emit('updateNameFac', { id, nombre: cliente });
 
       return 'Cliente cambiado';
     } catch {
