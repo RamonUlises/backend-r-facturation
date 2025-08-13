@@ -287,7 +287,8 @@ class FacturasModels {
       io.emit('facturaAbonar', { id, total });
 
       return 'Factura abonada';
-    } catch {
+    } catch(err) {
+      console.log(err);
       return 'Error al abonar la factura';
     }
   }
