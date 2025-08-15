@@ -35,6 +35,21 @@ class RecuperacionController {
       res.status(500).json({ message: 'Error al obtener recuperaciones' });
     }
   }
+  async eliminarRecuperacion(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      const result = await RecuperacionModels.eliminarRecuperacion(id);
+
+      if (result === 'Recuperacion eliminada') {
+        return res.status(200).json({ message: 'Recuperacion eliminada' });
+      }
+
+      return res.status(500).json({ message: 'Error al eliminar recuperación' });
+    } catch {
+      res.status(500).json({ message: 'Error al eliminar recuperación' });
+    }
+  }
 }
 
 export default new RecuperacionController();

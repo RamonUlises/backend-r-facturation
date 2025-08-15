@@ -49,6 +49,15 @@ class RecuperacionModels {
       return [];
     }
   }
+  async eliminarRecuperacion(id: string) {
+    try {
+      await RecuperacionSchemas.deleteOne({ id });
+
+      return 'Recuperacion eliminada';
+    } catch {
+      return 'Error al eliminar la recuperación';
+    }
+  }
 }
 
 export default new RecuperacionModels();
