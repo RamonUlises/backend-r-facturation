@@ -6,6 +6,7 @@ const RecuperacionSchema = new mongoose.Schema({
   fecha: { type: Date, required: true },
   recuperacion: { type: Number, required: true },
   factura: { type: String, required: true },
+  cliente: { type: String, required: true },
 });
 
 export const RecuperacionSchemas = mongoose.model('recuperacion', RecuperacionSchema);

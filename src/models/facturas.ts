@@ -274,6 +274,7 @@ class FacturasModels {
         facturador: factur['id-facturador'],
         factura: factur.id,
         recuperacion: abono,
+        cliente: factur.nombre,
       });
 
       io.emit('recuperacionAdd', {
@@ -282,6 +283,7 @@ class FacturasModels {
         facturador: factur['id-facturador'],
         factura: factur.id,
         recuperacion: abono,
+        cliente: factur.nombre,
       });
 
       io.emit('facturaAbonar', { id, total });
