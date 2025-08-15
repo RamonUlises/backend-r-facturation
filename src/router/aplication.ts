@@ -4,7 +4,7 @@ import path from 'node:path';
 const router = Router();
 
 const latestVersion = {
-  version: '3.5.0',
+  version: '3.6.0',
   notes: 'Nueva actualización',
   pub_date: '2025-08-012T12:00:00Z',
   platforms: {
