@@ -1,5 +1,6 @@
 import { RecuperacionType } from '@/types/recuperacion';
 import { RecuperacionSchemas } from '@/schemas/recuperacion';
+import io from '@/app';
 
 class RecuperacionModels {
   async obtenerRecuperacionesFecha(fecha: string) {
@@ -52,6 +53,8 @@ class RecuperacionModels {
   async eliminarRecuperacion(id: string) {
     try {
       await RecuperacionSchemas.deleteOne({ id });
+
+      io.emit('recuperacionDelete', id);
 
       return 'Recuperacion eliminada';
     } catch {
