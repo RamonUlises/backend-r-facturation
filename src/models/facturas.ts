@@ -513,7 +513,9 @@ class FacturasModels {
       inicioDelDia.setUTCHours(6, 0, 0, 0);
 
       const finDelDia = new Date(localDate2);
-      finDelDia.setUTCHours(29, 59, 59, 999);
+      finDelDia.setUTCHours(23, 59, 59, 999);
+
+      console.log(inicioDelDia, finDelDia);
 
       const pipeline: PipelineStage[] = [
         {
