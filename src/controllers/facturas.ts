@@ -158,13 +158,22 @@ class FacturasControllers {
   async abonarFacturaFacturador(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const { abono, fecha, idRecuperacion } = req.body as { abono: number, fecha: string, idRecuperacion: string };
+      const { abono, fecha, idRecuperacion } = req.body as {
+        abono: number;
+        fecha: string;
+        idRecuperacion: string;
+      };
 
-      if (isNaN(abono) || !fecha, !idRecuperacion) {
+      if ((isNaN(abono) || !fecha, !idRecuperacion)) {
         return res.status(400).json({ message: 'Faltan datos' });
       }
 
-      const response = await FacturasModels.abonarFacturaFacturador(id, idRecuperacion, abono, fecha);
+      const response = await FacturasModels.abonarFacturaFacturador(
+        id,
+        idRecuperacion,
+        abono,
+        fecha,
+      );
 
       if (response === 'Factura no encontrada') {
         return res.status(404).json({ message: response });
@@ -231,9 +240,12 @@ class FacturasControllers {
       const devoluciones =
         await DevolucionesModels.ObtenerDevolucionesFacturador(id, fecha);
       const cambios = await CambiosModels.obtenerCambiosFacturador(id, fecha);
-      const recuperacion = await RecuperacionModels.obtenerRecuperacionesFacturador(id, fecha);
+      const recuperacion =
+        await RecuperacionModels.obtenerRecuperacionesFacturador(id, fecha);
 
-      return res.status(200).json({ facturas, devoluciones, cambios, recuperacion });
+      return res
+        .status(200)
+        .json({ facturas, devoluciones, cambios, recuperacion });
     } catch {
       res.status(500).json({ message: 'Error al obtener resumen de facturas' });
     }
@@ -330,6 +342,20 @@ class FacturasControllers {
       return res.status(200).json({ message: response });
     } catch {
       res.status(500).json({ message: 'Error al cambiar cliente' });
+    }
+  }
+  async obtenerReporteRangos(req: Request, res: Response) {
+    try {
+      const { fechaInicio, fechaFin } = req.params;
+
+      const response = await FacturasModels.obtenerReporteRangos(
+        fechaInicio,
+        fechaFin,
+      );
+
+      return res.status(200).json(response);
+    } catch {
+      res.status(500).json({ message: 'Error al obtener factura' });
     }
   }
 }

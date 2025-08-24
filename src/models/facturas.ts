@@ -7,6 +7,7 @@ import { getMondayUTCMinus6 } from '@/lib/compararFacturas';
 import { RegistroType } from '@/types/registro';
 import { RegistroSchemas } from '@/schemas/registro';
 import { RecuperacionSchemas } from '@/schemas/recuperacion';
+import { PipelineStage } from 'mongoose';
 
 class FacturasModels {
   async obtenerFacturas(fecha: string) {
@@ -289,7 +290,7 @@ class FacturasModels {
       io.emit('facturaAbonar', { id, total });
 
       return 'Factura abonada';
-    } catch(err) {
+    } catch (err) {
       console.log(err);
       return 'Error al abonar la factura';
     }
@@ -482,6 +483,97 @@ class FacturasModels {
       return 'Cliente cambiado';
     } catch {
       return 'Error al cambiar cliente';
+    }
+  }
+  async obtenerReporteRangos(
+    fechaInicio: string,
+    fechaFin: string,
+  ): Promise<{
+    facturasTotales: number;
+    montoTotal: number;
+    montoMensual: {
+      _id: {
+        mes: string;
+        anio: string;
+      };
+      total: number;
+    }[];
+    montoAnual: {
+      _id: {
+        anio: string;
+      };
+      total: number;
+    }[];
+  }> {
+    try {
+      const localDate = new Date(fechaInicio);
+      const localDate2 = new Date(fechaFin);
+
+      const inicioDelDia = new Date(localDate);
+      inicioDelDia.setUTCHours(6, 0, 0, 0);
+
+      const finDelDia = new Date(localDate2);
+      finDelDia.setUTCHours(29, 59, 59, 999);
+
+      const pipeline: PipelineStage[] = [
+        {
+          $match: {
+            fecha: { $gte: inicioDelDia, $lte: finDelDia },
+          },
+        },
+        {
+          $facet: {
+            // total de facturas
+            facturasTotales: [{ $count: 'totalFacturas' }],
+
+            // monto total en el rango
+            montoTotal: [{ $group: { _id: null, total: { $sum: '$total' } } }],
+
+            // monto agrupado por mes
+            montoMensual: [
+              {
+                $group: {
+                  _id: { mes: { $month: '$fecha' }, anio: { $year: '$fecha' } },
+                  total: { $sum: '$total' },
+                },
+              },
+              { $sort: { '_id.anio': 1, '_id.mes': 1 } },
+            ],
+
+            // monto agrupado por año
+            montoAnual: [
+              {
+                $group: {
+                  _id: { anio: { $year: '$fecha' } },
+                  total: { $sum: '$total' },
+                },
+              },
+              { $sort: { '_id.anio': 1 } },
+            ],
+          },
+        },
+      ];
+
+      const resultado: {
+        facturasTotales: { totalFacturas: number }[];
+        montoTotal: { total: number }[];
+        montoMensual: { _id: { mes: string; anio: string }; total: number }[];
+        montoAnual: { _id: { anio: string }; total: number }[];
+      }[] = await FacturasSchemas.aggregate(pipeline);
+
+      return {
+        facturasTotales: resultado[0].facturasTotales[0]?.totalFacturas || 0,
+        montoTotal: resultado[0].montoTotal[0]?.total || 0,
+        montoMensual: resultado[0].montoMensual,
+        montoAnual: resultado[0].montoAnual,
+      };
+    } catch {
+      return {
+        facturasTotales: 0,
+        montoTotal: 0,
+        montoMensual: [],
+        montoAnual: [],
+      };
     }
   }
 }

@@ -67,4 +67,8 @@ router.put('/cambiar-cliente/factura/:id', (req, res) => {
   void FacturasControllers.cambiarClienteFactura(req, res);
 });
 
+router.get('/reportes/resumen/:fechaInicio/:fechaFin', (req, res) => {
+  void FacturasControllers.obtenerReporteRangos(req, res);
+});
+
 export default router;
