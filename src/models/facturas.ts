@@ -427,7 +427,7 @@ class FacturasModels {
       const facturas: FacturaType[] = await FacturasSchemas.find({
         'id-facturador': facturador,
         nombre: cliente,
-      });
+      }).sort({ fecha: -1 }).limit(20);
 
       return facturas;
     } catch {
